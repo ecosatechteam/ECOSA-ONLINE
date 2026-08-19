@@ -3,8 +3,31 @@ const router = express.Router()
 const Post = require('../models/Post')
 const { addPost: addToStore, listPosts } = require('../utils/store')
 
+function seedPosts() {
+  if (listPosts().length > 0) return
+
+  const now = new Date().toISOString()
+  addToStore({
+    id: `p_${Date.now()}_1`,
+    type: 'event',
+    author: 'Behangana Keneth',
+    title: 'ECOSA Networking Dinner',
+    content: 'You\'re invited — ECOSA Networking Dinner. Reconnect and build partnerships. The event will happen on Friday 27th November, 2026. Tickets: UGX 50,000 — register to secure your seat. Venue: SKYz Hotel Naguru.',
+    media: '/sample-event1.svg',
+    createdAt: now,
+    comments: [],
+    likes: [],
+    shares: 0,
+    rsvps: [],
+    eventType: 'register',
+    actionLabel: 'Register',
+    registerUrl: '/payments?purpose=Event+Ticket&amount=50000'
+  })
+}
+
 router.get('/', async (req, res) => {
   try {
+    seedPosts()
     const posts = await Post.find({ isPublished: true }).sort({ createdAt: -1 }).catch(() => [])
     res.json(posts.length ? posts : listPosts())
   } catch (err) {

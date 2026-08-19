@@ -2,8 +2,31 @@ const express = require('express')
 const router = express.Router()
 const Payment = require('../models/Payment')
 const Member = require('../models/Member')
-const { upsertPayment, listPayments, upsertMember } = require('../utils/store')
+const { upsertPayment, listPayments, upsertMember, listMembers } = require('../utils/store')
 const { generateReceiptPdf, sendSms, sendWhatsApp, sendEmail } = require('../utils/notifications')
+
+function seedPayments() {
+  if (listPayments().length > 0) return
+
+  const members = listMembers()
+  if (!members.length) return
+
+  const now = new Date().toISOString()
+  members.forEach((member) => {
+    upsertPayment({
+      id: `pay_${member.membershipNumber}`,
+      memberId: member.id,
+      memberName: member.name,
+      amount: 20000,
+      currency: 'UGX',
+      method: 'bank',
+      reference: 'Centenary A/C 3100111822 (ECOSA)',
+      paid: true,
+      status: 'paid',
+      at: now
+    })
+  })
+}
 
 function generateMembershipNumber() {
   const stamp = Date.now().toString().slice(-6)
@@ -12,6 +35,7 @@ function generateMembershipNumber() {
 
 router.get('/', async (req, res) => {
   try {
+    seedPayments()
     const payments = await Payment.find().sort({ createdAt: -1 }).catch(() => [])
     res.json(payments.length ? payments : listPayments())
   } catch (err) {
@@ -42,6 +66,86 @@ router.post('/initiate', async (req, res) => {
     res.json({ ok: true, paymentId: newPayment._id })
   } catch (err) {
     res.status(500).json({ message: 'Failed to initiate payment' })
+  }
+})
+
+router.patch('/:id/confirm', async (req, res) => {
+  try {
+    const now = new Date().toISOString()
+    const { reference = '' } = req.body || {}
+
+    const paymentDoc = await Payment.findById(req.params.id).catch(() => null)
+    let paymentData = paymentDoc ? (paymentDoc.toObject ? paymentDoc.toObject() : paymentDoc) : listPayments().find((item) => String(item._id || item.id) === String(req.params.id))
+
+    if (!paymentData) {
+      return res.status(404).json({ message: 'Payment not found' })
+    }
+
+    paymentData = {
+      ...paymentData,
+      status: 'paid',
+      paid: true,
+      confirmedAt: now,
+      gatewayReference: reference || paymentData.gatewayReference || ''
+    }
+
+    if (paymentDoc) {
+      Object.assign(paymentDoc, paymentData)
+      try {
+        await paymentDoc.save()
+      } catch (err) {
+        upsertPayment(paymentData)
+      }
+    } else {
+      upsertPayment(paymentData)
+    }
+
+    let member = null
+    if (paymentData.memberId) {
+      member = await Member.findById(paymentData.memberId).catch(() => null)
+    }
+
+    if (!member && paymentData.email) {
+      member = await Member.findOne({ email: String(paymentData.email).toLowerCase() }).catch(() => null)
+    }
+
+    if (!member) {
+      member = listMembers().find((item) => (item.email || '').toLowerCase() === String(paymentData.email || '').toLowerCase()) || null
+    }
+
+    if (!member) {
+      member = new Member({
+        name: paymentData.memberName || '',
+        email: paymentData.email || '',
+        phone: paymentData.phone || '',
+        paymentStatus: 'paid'
+      })
+    }
+
+    member.paymentStatus = 'paid'
+    if (!member.membershipNumber) {
+      member.membershipNumber = generateMembershipNumber()
+    }
+    member.confirmedAt = now
+
+    try {
+      await member.save()
+    } catch (err) {
+      upsertMember(member.toObject ? member.toObject() : member)
+    }
+
+    if (paymentDoc && !paymentData.memberId && member._id) {
+      paymentDoc.memberId = member._id
+      try {
+        await paymentDoc.save()
+      } catch (err) {
+        upsertPayment({ ...paymentData, memberId: member._id })
+      }
+    }
+
+    res.json({ ok: true, payment: paymentData, member: member.toObject ? member.toObject() : member })
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to confirm payment' })
   }
 })
 

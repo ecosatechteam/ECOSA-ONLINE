@@ -58,6 +58,22 @@ npm run dev
 
 The backend listens on `http://localhost:4000` by default and provides API endpoints under `/api`.
 
+### MongoDB Atlas
+
+The backend already reads its MongoDB connection string from `backend/.env` through `MONGODB_URI`. To connect it to MongoDB Atlas:
+
+1. Create `backend/.env` from the template below.
+2. Replace `<db_password>` with your Atlas database user's password.
+3. Make sure the Atlas cluster allows your IP address in Network Access.
+
+```text
+MONGODB_URI=mongodb+srv://tuancreationsafrica_db_user:<db_password>@cluster0.xhk6biz.mongodb.net/tuan_creations?appName=Cluster0
+PORT=4000
+JWT_SECRET=replace-with-a-long-secret
+```
+
+If Atlas is reachable, the backend connects to it on startup. If the connection fails, the server logs a warning and continues in fallback mode.
+
 ### 2. Start the frontend dev server
 
 ```bash

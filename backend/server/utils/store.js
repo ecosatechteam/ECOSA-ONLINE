@@ -4,7 +4,9 @@ const state = {
   members: [],
   payments: [],
   posts: [],
-  admins: []
+  admins: [],
+  resources: [],
+  chapters: []
 }
 
 function isDbConnected() {
@@ -65,6 +67,42 @@ function listPosts() {
   return state.posts
 }
 
+function upsertResource(resource) {
+  const existingIndex = state.resources.findIndex((item) => item.id === resource.id)
+  if (existingIndex >= 0) {
+    state.resources[existingIndex] = { ...state.resources[existingIndex], ...resource }
+    return state.resources[existingIndex]
+  }
+  state.resources.unshift(resource)
+  return resource
+}
+
+function listResources() {
+  return state.resources
+}
+
+function removeResource(resourceId) {
+  state.resources = state.resources.filter((item) => item.id !== resourceId)
+}
+
+function upsertChapter(chapter) {
+  const existingIndex = state.chapters.findIndex((item) => item.id === chapter.id)
+  if (existingIndex >= 0) {
+    state.chapters[existingIndex] = { ...state.chapters[existingIndex], ...chapter }
+    return state.chapters[existingIndex]
+  }
+  state.chapters.push(chapter)
+  return chapter
+}
+
+function listChapters() {
+  return state.chapters
+}
+
+function removeChapter(chapterId) {
+  state.chapters = state.chapters.filter((item) => item.id !== chapterId)
+}
+
 module.exports = {
   isDbConnected,
   clone,
@@ -76,5 +114,11 @@ module.exports = {
   upsertPayment,
   listPayments,
   addPost,
-  listPosts
+  listPosts,
+  upsertResource,
+  listResources,
+  removeResource,
+  upsertChapter,
+  listChapters,
+  removeChapter
 }

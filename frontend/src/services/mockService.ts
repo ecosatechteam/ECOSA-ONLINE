@@ -17,7 +17,29 @@ export type Member = {
   isAdmin?: boolean
 }
 
+export type Chapter = {
+  id: string
+  name: string
+  description: string
+  chairperson?: string
+  members?: number
+  location?: string
+  status?: string
+}
+
 const SESS_KEY = 'ecosa_session'
+const CHAPTERS_KEY = 'ecosa_chapters'
+const DEFAULT_CHAPTERS: Chapter[] = [
+  { id: 'chap_kampala', name: 'Kampala', chairperson: 'TBA', members: 0, status: 'Active', description: 'The Kampala Chapter brings together ECOSA members living and working in Kampala and the surrounding areas.' },
+  { id: 'chap_ibanda', name: 'Ibanda', chairperson: 'TBA', members: 0, status: 'Active', description: 'The Ibanda Chapter serves members residing in Ibanda District and neighboring areas.' },
+  { id: 'chap_mbarara', name: 'Mbarara', chairperson: 'TBA', members: 0, status: 'Active', description: 'The Mbarara Chapter connects alumni living and working in Western Uganda.' },
+  { id: 'chap_fort_portal', name: 'Fort Portal', chairperson: 'TBA', members: 0, status: 'Active', description: 'The Fort Portal Chapter promotes networking and collaboration among alumni in the Tooro region.' },
+  { id: 'chap_gulu', name: 'Gulu', chairperson: 'TBA', members: 0, status: 'Active', description: 'The Gulu Chapter brings together alumni living in Northern Uganda.' },
+  { id: 'chap_jinja', name: 'Jinja', chairperson: 'TBA', members: 0, status: 'Active', description: 'The Jinja Chapter supports alumni in Busoga and Eastern Uganda.' },
+  { id: 'chap_kabale', name: 'Kabale', chairperson: 'TBA', members: 0, status: 'Active', description: 'The Kabale Chapter represents alumni living in the Kigezi region.' },
+  { id: 'chap_uae', name: 'UAE', chairperson: 'TBA', members: 0, status: 'Planned', description: 'The UAE Chapter brings together ECOSA members living and working in the United Arab Emirates.' },
+  { id: 'chap_usa', name: 'USA', chairperson: 'TBA', members: 0, status: 'Planned', description: 'The USA Chapter connects ECOSA members across the United States.' },
+]
 
 async function api(path: string, opts?: any) {
   const base = import.meta.env.VITE_API_BASE || 'http://localhost:4000/api'
@@ -89,20 +111,103 @@ export async function authRegister(name: string, email: string, password: string
   }
 }
 
+export async function getChapters() {
+  try {
+    return await api('/chapters')
+  } catch {
+    return readChapters()
+  }
+}
+
+export async function saveChapter(chapter: Chapter) {
+  try {
+    const method = chapter.id ? 'PUT' : 'POST'
+    const url = chapter.id ? `/chapters/${encodeURIComponent(chapter.id)}` : '/chapters'
+    return await api(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(chapter),
+    })
+  } catch {
+    const chapters = read(CHAPTERS_KEY)
+    const next = { ...chapter, id: chapter.id || `chap_${Date.now()}`, members: Number(chapter.members || 0) }
+    const index = chapters.findIndex((item: any) => item.id === next.id)
+    if (index >= 0) chapters[index] = { ...chapters[index], ...next }
+    else chapters.unshift(next)
+    write(CHAPTERS_KEY, chapters)
+    return next
+  }
+}
+
+export async function deleteChapter(chapterId: string) {
+  try {
+    return await api(`/chapters/${encodeURIComponent(chapterId)}`, { method: 'DELETE' })
+  } catch {
+    const chapters = read(CHAPTERS_KEY)
+    write(CHAPTERS_KEY, chapters.filter((item: any) => item.id !== chapterId))
+    return { ok: true }
+  }
+}
+
 // Generic helpers for local storage fallback
 function read(key: string) {
-  return JSON.parse(localStorage.getItem(key) || '[]')
+  try {
+    return JSON.parse(localStorage.getItem(key) || '[]')
+  } catch {
+    localStorage.removeItem(key)
+    return []
+  }
 }
 function write(key: string, val: any) {
   localStorage.setItem(key, JSON.stringify(val))
 }
 
+function readChapters() {
+  const chapters = read(CHAPTERS_KEY)
+  return chapters.length ? chapters : DEFAULT_CHAPTERS
+}
+
+function readPosts() {
+  const posts = read('ecosa_posts')
+  if (posts.length) return posts
+  return [
+    {
+      id: 'p_seed_event',
+      type: 'event',
+      author: 'Behangana Keneth',
+      title: 'ECOSA Networking Dinner',
+      content: 'You\'re invited — ECOSA Networking Dinner. Reconnect and build partnerships. The event will happen on Friday 27th November, 2026. Tickets: UGX 50,000 — register to secure your seat. Venue: SKYz Hotel Naguru.',
+      media: '/sample-event1.svg',
+      createdAt: new Date().toISOString(),
+      comments: [],
+      likes: [],
+      shares: 0,
+      rsvps: [],
+      eventType: 'register',
+      actionLabel: 'Register',
+      registerUrl: '/payments?purpose=Event+Ticket&amount=50000',
+    },
+  ]
+}
+
 // Members
 export async function getMembers() {
   try {
-    return await api('/members')
+    const result = await api('/members')
+    if (Array.isArray(result) && result.length) return result
+    return read('ecosa_members').filter((m: any) => m.paymentStatus === 'paid' || m.membershipNumber)
   } catch {
     return read('ecosa_members').filter((m: any) => m.paymentStatus === 'paid' || m.membershipNumber)
+  }
+}
+
+export async function getAllMembers() {
+  try {
+    const result = await api('/members?all=true')
+    if (Array.isArray(result) && result.length) return result
+    return read('ecosa_members')
+  } catch {
+    return read('ecosa_members')
   }
 }
 export async function saveMember(m: Member) {
@@ -119,6 +224,54 @@ export async function saveMember(m: Member) {
     else list.push(m)
     write('ecosa_members', list)
     return m
+  }
+}
+
+export async function confirmPayment(paymentId: string, reference?: string) {
+  try {
+    return await api(`/payments/${encodeURIComponent(paymentId)}/confirm`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reference }),
+    })
+  } catch {
+    const payments = read('ecosa_payments')
+    const index = payments.findIndex((item: any) => String(item._id || item.id) === String(paymentId))
+    if (index < 0) throw new Error('Payment not found')
+
+    const now = new Date().toISOString()
+    const updatedPayment = {
+      ...payments[index],
+      status: 'paid',
+      paid: true,
+      confirmedAt: now,
+      gatewayReference: reference || payments[index].gatewayReference || `manual-${Date.now()}`,
+    }
+    payments[index] = updatedPayment
+    write('ecosa_payments', payments)
+
+    const members = read('ecosa_members')
+    const email = String(updatedPayment.email || updatedPayment.memberEmail || updatedPayment.member?.email || '').toLowerCase()
+    let member = members.find((item: any) => (item.email || '').toLowerCase() === email)
+    if (!member) {
+      member = {
+        id: updatedPayment.memberId || updatedPayment.id || `mem_${Date.now()}`,
+        name: updatedPayment.memberName || updatedPayment.member?.name || '',
+        email,
+        phone: updatedPayment.phone || updatedPayment.member?.phone || '',
+        paymentStatus: 'paid',
+        membershipNumber: `EC-${Date.now().toString().slice(-6)}`,
+        registeredAt: now,
+      }
+      members.unshift(member)
+    } else {
+      member.paymentStatus = 'paid'
+      member.membershipNumber = member.membershipNumber || `EC-${Date.now().toString().slice(-6)}`
+      member.registeredAt = member.registeredAt || now
+    }
+    write('ecosa_members', members)
+
+    return updatedPayment
   }
 }
 
@@ -186,7 +339,9 @@ export async function addPayment(payment: any) {
 }
 export async function getPayments() {
   try {
-    return await api('/payments')
+    const result = await api('/payments')
+    if (Array.isArray(result) && result.length) return result
+    return read('ecosa_payments')
   } catch {
     return read('ecosa_payments')
   }
@@ -214,9 +369,9 @@ export async function getJobs() {
   try {
     return await api('/jobs')
   } catch {
-    const raw = read('ecosa_jobs')
+    return readPosts()
     const seen = new Set<string>()
-    const out: any[] = []
+    return readPosts()
     for (const j of raw) {
       const key = j.id || `${j.title}:::${j.desc}:::${j.poster}`
       if (!seen.has(key)) {
@@ -231,9 +386,11 @@ export async function getJobs() {
 // Posts & Polls
 export async function getPosts() {
   try {
-    return await api('/posts')
+    const result = await api('/posts')
+    if (Array.isArray(result) && result.length) return result
+    return readPosts()
   } catch {
-    return read('ecosa_posts')
+    return readPosts()
   }
 }
 export async function addPost(post: any) {
@@ -248,6 +405,16 @@ export async function addPost(post: any) {
     list.unshift(post)
     write('ecosa_posts', list)
     return post
+  }
+}
+
+export async function deletePost(postId: string) {
+  try {
+    return await api(`/posts/${encodeURIComponent(postId)}`, { method: 'DELETE' })
+  } catch {
+    const list = read('ecosa_posts')
+    write('ecosa_posts', list.filter((post: any) => String(post.id) !== String(postId)))
+    return { ok: true }
   }
 }
 
@@ -363,7 +530,9 @@ export async function voteLeader(leaderId: string, voterEmail: string) {
     const posts = [
       {
         id: `p_${Date.now()}_1`,
+        type: 'event',
         author: 'Behangana Keneth',
+        title: 'ECOSA Networking Dinner',
         content: 'You\'re invited — ECOSA Networking Dinner. Reconnect and build partnerships. The event will happen on Friday 27th November, 2026. Tickets: UGX 50,000 — register to secure your seat. Venue: SKYz Hotel Naguru.',
         media: '/sample-event1.svg',
         createdAt: now,
@@ -371,6 +540,8 @@ export async function voteLeader(leaderId: string, voterEmail: string) {
         likes: [],
         shares: 0,
         rsvps: [],
+        eventType: 'register',
+        actionLabel: 'Register',
         registerUrl: '/payments?purpose=Event+Ticket&amount=50000'
       }
     ]
@@ -428,7 +599,9 @@ export async function voteLeader(leaderId: string, voterEmail: string) {
       const posts = [
         {
           id: `p_${Date.now()}_1`,
+          type: 'event',
           author: 'Behangana Keneth',
+          title: 'ECOSA Networking Dinner',
           content: 'You\'re invited — ECOSA Networking Dinner. Reconnect and build partnerships. The event will happen on Friday 27th November, 2026. Tickets: UGX 50,000 — register to secure your seat. Venue: SKYz Hotel Naguru.',
           media: '/sample-event1.svg',
           createdAt: now,
@@ -436,10 +609,16 @@ export async function voteLeader(leaderId: string, voterEmail: string) {
           likes: [],
           shares: 0,
           rsvps: [],
+          eventType: 'register',
+          actionLabel: 'Register',
           registerUrl: '/payments?purpose=Event+Ticket&amount=50000'
         }
       ]
       write('ecosa_posts', posts)
+    }
+
+    if (!localStorage.getItem(CHAPTERS_KEY)) {
+      write(CHAPTERS_KEY, DEFAULT_CHAPTERS)
     }
   } catch (e) {
     // ignore localStorage errors in non-browser environments

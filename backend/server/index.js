@@ -8,6 +8,8 @@ const authRoute = require('./routes/auth')
 const membersRoute = require('./routes/members')
 const paymentsRoute = require('./routes/payments')
 const postsRoute = require('./routes/posts')
+const resourcesRoute = require('./routes/resources')
+const chaptersRoute = require('./routes/chapters')
 const authMiddleware = require('./middleware/auth')
 
 const app = express()
@@ -25,6 +27,8 @@ app.use('/api/auth', authRoute)
 app.use('/api/members', membersRoute)
 app.use('/api/payments', paymentsRoute)
 app.use('/api/posts', postsRoute)
+app.use('/api/resources', resourcesRoute)
+app.use('/api/chapters', chaptersRoute)
 
 app.get('/api/admin/dashboard', authMiddleware, async (req, res) => {
   res.json({ ok: true, user: req.user })

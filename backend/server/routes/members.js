@@ -3,8 +3,39 @@ const router = express.Router()
 const Member = require('../models/Member')
 const { upsertMember, listMembers, clone } = require('../utils/store')
 
+const defaultMembers = [
+  { id: 'EC-001', name: 'Agaba Francis' },
+  { id: 'EC-002', name: 'Benard Mugumya' },
+  { id: 'EC-003', name: 'Harriet Kyomugisha' },
+  { id: 'EC-004', name: 'Kizito Mwebaze' },
+  { id: 'EC-005', name: 'Evas Turinawe' },
+  { id: 'EC-006', name: 'Henry Tumusiime' },
+  { id: 'EC-007', name: 'Keneth Behangana' },
+  { id: 'EC-008', name: 'Atuhe Roman' },
+  { id: 'EC-009', name: 'Noel Mjitu' },
+  { id: 'EC-010', name: 'Nyakarungi Grace' },
+  { id: 'EC-011', name: 'Muhwezi Moses' },
+  { id: 'EC-012', name: 'Kakuru Benard' },
+  { id: 'EC-013', name: 'Africano' },
+  { id: 'EC-014', name: 'Dorothy Asiimwe' },
+  { id: 'EC-015', name: 'Ndeeba Stephenson' },
+  { id: 'EC-016', name: 'Ayebare Sperio Ssalongo' }
+].map((member) => ({
+  ...member,
+  membershipNumber: member.id,
+  paymentStatus: 'paid',
+  isAdmin: ['EC-001', 'EC-002'].includes(member.id)
+}))
+
+function seedMembers() {
+  if (listMembers().length === 0) {
+    defaultMembers.forEach((member) => upsertMember(member))
+  }
+}
+
 router.get('/', async (req, res) => {
   try {
+    seedMembers()
     const query = { paymentStatus: 'paid' }
     if (req.query.all === 'true') {
       delete query.paymentStatus

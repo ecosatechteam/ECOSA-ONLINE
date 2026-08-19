@@ -479,6 +479,10 @@ textarea {
     gap: 24px;
   }
 
+  .dashboard-shell {
+    padding-bottom: 24px;
+  }
+
   .dashboard-hero {
     display: flex;
     justify-content: space-between;
@@ -523,6 +527,122 @@ textarea {
     font-size: 36px;
     font-weight: 700;
     color: var(--primary);
+  }
+
+  .dashboard-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  .dashboard-section {
+    display: grid;
+    gap: 16px;
+    padding: 22px;
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid #e7ecf7;
+  }
+
+  .dashboard-section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-section-head h4 {
+    margin: 0 0 6px;
+  }
+
+  .dashboard-section-head p {
+    margin: 0;
+  }
+
+  .dashboard-toolbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-inline-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+
+  .dashboard-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .dashboard-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    background: #eef4ff;
+    color: var(--primary);
+  }
+
+  .dashboard-chip.success {
+    background: #e9fbf1;
+    color: #107c41;
+  }
+
+  .dashboard-chip.warn {
+    background: #fff4e5;
+    color: #a45a00;
+  }
+
+  .dashboard-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .dashboard-table {
+    width: 100%;
+    min-width: 680px;
+    border-collapse: collapse;
+  }
+
+  .dashboard-table th,
+  .dashboard-table td {
+    text-align: left;
+    padding: 12px 10px;
+    border-bottom: 1px solid #edf1f7;
+    vertical-align: top;
+  }
+
+  .dashboard-table th {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .dashboard-table td strong {
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .dashboard-form {
+    display: grid;
+    gap: 12px;
+  }
+
+  .dashboard-empty {
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px dashed #d8e0ec;
+    background: #fbfcff;
+    color: var(--muted);
   }
 
   .dashboard-panel {
