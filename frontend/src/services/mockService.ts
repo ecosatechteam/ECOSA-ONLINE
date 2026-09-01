@@ -149,6 +149,85 @@ export async function deleteChapter(chapterId: string) {
   }
 }
 
+export async function getLeaders(regime?: string) {
+  try {
+    const url = regime ? `/leaders?regime=${encodeURIComponent(regime)}` : '/leaders'
+    return await api(url)
+  } catch {
+    const leaders = readLeaders().map((leader: any) => ({ ...leader, regime: leader.regime || 'current' }))
+    if (!regime || regime === 'current') return leaders.filter((leader: any) => (leader.regime || 'current') === 'current')
+    return leaders.filter((leader: any) => String(leader.regime || '').toLowerCase().includes(String(regime).toLowerCase()))
+  }
+}
+
+export async function saveLeader(leader: any) {
+  try {
+    const method = leader.id ? 'PUT' : 'POST'
+    const url = leader.id ? `/leaders/${encodeURIComponent(leader.id)}` : '/leaders'
+    return await api(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(leader),
+    })
+  } catch {
+    const leaders = read('ecosa_leaders')
+    const next = { ...leader, id: leader.id || `leader_${Date.now()}`, regime: leader.regime || 'current' }
+    const index = leaders.findIndex((item: any) => item.id === next.id)
+    if (index >= 0) leaders[index] = { ...leaders[index], ...next }
+    else leaders.unshift(next)
+    write('ecosa_leaders', leaders)
+    return next
+  }
+}
+
+export async function deleteLeader(leaderId: string) {
+  try {
+    return await api(`/leaders/${encodeURIComponent(leaderId)}`, { method: 'DELETE' })
+  } catch {
+    const leaders = read('ecosa_leaders')
+    write('ecosa_leaders', leaders.filter((item: any) => item.id !== leaderId))
+    return { ok: true }
+  }
+}
+
+export async function getProjects() {
+  try {
+    return await api('/projects')
+  } catch {
+    return readProjects()
+  }
+}
+
+export async function saveProject(project: any) {
+  try {
+    const method = project.id ? 'PUT' : 'POST'
+    const url = project.id ? `/projects/${encodeURIComponent(project.id)}` : '/projects'
+    return await api(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(project),
+    })
+  } catch {
+    const projects = read('ecosa_projects')
+    const next = { ...project, id: project.id || `proj_${Date.now()}`, featured: Boolean(project.featured) }
+    const index = projects.findIndex((item: any) => item.id === next.id)
+    if (index >= 0) projects[index] = { ...projects[index], ...next }
+    else projects.unshift(next)
+    write('ecosa_projects', projects)
+    return next
+  }
+}
+
+export async function deleteProject(projectId: string) {
+  try {
+    return await api(`/projects/${encodeURIComponent(projectId)}`, { method: 'DELETE' })
+  } catch {
+    const projects = read('ecosa_projects')
+    write('ecosa_projects', projects.filter((item: any) => item.id !== projectId))
+    return { ok: true }
+  }
+}
+
 // Generic helpers for local storage fallback
 function read(key: string) {
   try {
@@ -165,6 +244,28 @@ function write(key: string, val: any) {
 function readChapters() {
   const chapters = read(CHAPTERS_KEY)
   return chapters.length ? chapters : DEFAULT_CHAPTERS
+}
+
+function readLeaders() {
+  const leaders = read('ecosa_leaders')
+  return leaders.length
+    ? leaders
+    : [
+        { id: 'l_chair', name: 'Omuteeganda Adson', role: 'Chair (Interim)', regime: 'current', bio: 'Leads the interim ECOSA executive and oversees administrative coordination.' },
+        { id: 'l_secretary', name: 'Agaba Francis', role: 'Secretary (Interim)', regime: 'current', bio: 'Coordinates correspondence, records, and executive follow-up.' },
+        { id: 'l_treasurer', name: 'Evas Turinawe', role: 'Treasurer (Interim)', regime: 'current', bio: 'Oversees member finances, payments, and financial reporting.' },
+        { id: 'l_outreach', name: 'Benard Mugumya', role: 'Outreach Lead', regime: 'current', bio: 'Connects members, chapters, and external partners across the association.' },
+      ]
+}
+
+function readProjects() {
+  const projects = read('ecosa_projects')
+  return projects.length
+    ? projects
+    : [
+        { id: 'proj_sacco', title: 'ECOSA SACCO', description: 'A member-owned savings and credit cooperative helping alumni save, access loans, and build financial security together.', status: 'Ongoing', featured: true },
+        { id: 'proj_insurance', title: 'ECOSA Medical Insurance', description: 'Affordable group medical cover for alumni and their families, providing access to quality healthcare when it matters most.', status: 'Ongoing', featured: true },
+      ]
 }
 
 function readPosts() {
@@ -439,18 +540,6 @@ export async function getPollVotes() {
   }
 }
 
-// Leaders and voting
-export async function getLeaders(regime?: string) {
-  try {
-    const url = regime ? `/leaders?regime=${encodeURIComponent(regime)}` : '/leaders'
-    return await api(url)
-  } catch {
-    const raw = read('ecosa_leaders')
-    const list = raw.map((l: any) => ({ ...l, regime: l.regime || 'current' }))
-    if (!regime || regime === 'current') return list.filter((l: any) => l.regime === 'current')
-    return list.filter((l: any) => (l.regime || '').toLowerCase().includes(String(regime).toLowerCase()))
-  }
-}
 export async function getLeaderVotes() {
   try {
     return await api('/leader-votes')

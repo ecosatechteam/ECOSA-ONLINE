@@ -6,7 +6,9 @@ const state = {
   posts: [],
   admins: [],
   resources: [],
-  chapters: []
+  chapters: [],
+  leaders: [],
+  projects: []
 }
 
 function isDbConnected() {
@@ -103,6 +105,42 @@ function removeChapter(chapterId) {
   state.chapters = state.chapters.filter((item) => item.id !== chapterId)
 }
 
+function upsertLeader(leader) {
+  const existingIndex = state.leaders.findIndex((item) => item.id === leader.id)
+  if (existingIndex >= 0) {
+    state.leaders[existingIndex] = { ...state.leaders[existingIndex], ...leader }
+    return state.leaders[existingIndex]
+  }
+  state.leaders.push(leader)
+  return leader
+}
+
+function listLeaders() {
+  return state.leaders
+}
+
+function removeLeader(leaderId) {
+  state.leaders = state.leaders.filter((item) => item.id !== leaderId)
+}
+
+function upsertProject(project) {
+  const existingIndex = state.projects.findIndex((item) => item.id === project.id)
+  if (existingIndex >= 0) {
+    state.projects[existingIndex] = { ...state.projects[existingIndex], ...project }
+    return state.projects[existingIndex]
+  }
+  state.projects.push(project)
+  return project
+}
+
+function listProjects() {
+  return state.projects
+}
+
+function removeProject(projectId) {
+  state.projects = state.projects.filter((item) => item.id !== projectId)
+}
+
 module.exports = {
   isDbConnected,
   clone,
@@ -120,5 +158,11 @@ module.exports = {
   removeResource,
   upsertChapter,
   listChapters,
-  removeChapter
+  removeChapter,
+  upsertLeader,
+  listLeaders,
+  removeLeader,
+  upsertProject,
+  listProjects,
+  removeProject
 }

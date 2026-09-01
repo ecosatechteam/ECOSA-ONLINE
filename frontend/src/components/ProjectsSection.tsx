@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { getProjects } from '../services/mockService'
 
 type Project = {
   title: string
@@ -7,50 +8,6 @@ type Project = {
   featured?: boolean
 }
 
-const featuredProjects: Project[] = [
-  {
-    title: 'ECOSA SACCO',
-    description: 'A member-owned savings and credit cooperative helping alumni save, access loans, and build financial security together.',
-    status: 'Ongoing',
-    featured: true,
-  },
-  {
-    title: 'ECOSA Medical Insurance',
-    description: 'Affordable group medical cover for alumni and their families, providing access to quality healthcare when it matters most.',
-    status: 'Ongoing',
-    featured: true,
-  },
-]
-
-const allProjects: Project[] = [
-  ...featuredProjects,
-  {
-    title: 'Alumni Scholarship Fund',
-    description: 'Support current students with tuition, mentorship, and career coaching.',
-    status: 'Ongoing',
-  },
-  {
-    title: 'Community Health Drive',
-    description: 'Fund medical camps, clean water projects and health education for alumni families.',
-    status: 'Ongoing',
-  },
-  {
-    title: 'Library Renovation',
-    description: 'Upgrade the college library with new books, furniture and study spaces.',
-    status: 'Planned',
-  },
-  {
-    title: 'Entrepreneurship Bootcamp',
-    description: 'Run a skills accelerator for alumni-led startups and small businesses.',
-    status: 'Planned',
-  },
-  {
-    title: 'Sports & Wellness Hub',
-    description: 'Create a wellness program and equipment fund for students and alumni.',
-    status: 'Ongoing',
-  },
-]
-
 export default function ProjectsSection({
   onContribute,
   onDonate,
@@ -58,6 +15,24 @@ export default function ProjectsSection({
   onContribute?: () => void
   onDonate?: () => void
 }) {
+  const [projects, setProjects] = useState<Project[]>([])
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const data = await getProjects()
+        if (mounted) setProjects(data || [])
+      } catch (error) {}
+    })()
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  const featuredProjects = projects.filter((project) => project.featured)
+  const allProjects = projects.length ? projects : featuredProjects
+
   return (
     <section className="card" style={{ marginTop: 24 }}>
       <h3>Projects</h3>

@@ -31,7 +31,7 @@ export default function PostCard({post,refresh}:{post:any,refresh?:()=>void}){
       : media?.data || media?.url || undefined
 
   const actionLabel = post.type === 'event'
-    ? (post.eventType === 'pay' ? 'Pay now' : 'Register')
+    ? 'Register'
     : post.type === 'job'
       ? 'Apply now'
       : post.type === 'announcement'
@@ -42,7 +42,7 @@ export default function PostCard({post,refresh}:{post:any,refresh?:()=>void}){
 
   const actionUrl = post.type === 'job'
     ? (post.applyUrl || post.registerUrl)
-    : post.type === 'event' && post.eventType === 'pay'
+    : post.type === 'event'
       ? (post.registerUrl || `/payments?purpose=Event+Ticket&amount=${encodeURIComponent(String(post.amount || 0))}`)
       : post.registerUrl || post.actionUrl
 
