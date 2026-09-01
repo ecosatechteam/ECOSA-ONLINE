@@ -4,7 +4,7 @@ const paymentSchema = new mongoose.Schema({
   memberId: { type: mongoose.Schema.Types.ObjectId, ref: 'Member' },
   memberName: { type: String, default: '' },
   email: { type: String, default: '' },
-  purpose: { type: String, default: 'Membership' },
+  purpose: { type: String, default: 'Alumni Dues' },
   amount: { type: Number, required: true },
   currency: { type: String, default: 'UGX' },
   method: { type: String, default: 'mpesa' },

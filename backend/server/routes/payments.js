@@ -50,7 +50,7 @@ router.post('/initiate', async (req, res) => {
     const newPayment = new Payment({
       memberName: member?.name || '',
       email: (member?.email || '').toLowerCase(),
-      purpose: payment?.purpose || 'Membership',
+      purpose: payment?.purpose || 'Alumni Dues',
       amount: payment?.amount || 0,
       currency: payment?.currency || 'UGX',
       method: payment?.method || 'mobile',
@@ -227,7 +227,7 @@ router.post('/webhook', async (req, res) => {
           upsertPayment(payment)
         }
 
-        const message = `Your ECOSA payment was successful. Membership number: ${member.membershipNumber}`
+        const message = `Your ECOSA payment was successful. Alumni number: ${member.membershipNumber}`
         await sendSms(member.phone, message)
         await sendWhatsApp(member.phone, message)
         await sendEmail(member.email, 'ECOSA payment successful', `<p>Thank you for paying. Your membership number is ${member.membershipNumber}</p>`)

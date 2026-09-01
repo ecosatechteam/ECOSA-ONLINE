@@ -17,14 +17,23 @@ export default function Community(){
   },[])
 
   return (
-    <div>
-      <div className="card">
-        <h3>Community Updates</h3>
-        <p>Latest announcements from ECOSA administration. This page is read-only; only admins publish updates here.</p>
-      </div>
+    <div className="page-stack">
+      <section className="card section-hero">
+        <div>
+          <span className="eyebrow">Community</span>
+          <h1 style={{ margin: '10px 0 8px' }}>Alumni Updates</h1>
+          <p className="muted" style={{ margin: 0, maxWidth: '72ch', lineHeight: 1.8 }}>
+            Latest announcements from ECOSA leadership, presented in a clean read-only feed.
+          </p>
+        </div>
+        <div className="hero-metric" style={{ minWidth: 180 }}>
+          <strong>{posts.length}</strong>
+          <span>Published update{posts.length === 1 ? '' : 's'}</span>
+        </div>
+      </section>
 
-      <div style={{marginTop:12}}>
-        {posts.length===0 && <div className="card">No updates yet — check back later.</div>}
+      <div style={{ display: 'grid', gap: 16 }}>
+        {posts.length===0 && <div className="card dashboard-empty">No alumni updates yet — check back later.</div>}
         {posts.map((post:any)=> (
           <PostCard key={post.id} post={post} />
         ))}

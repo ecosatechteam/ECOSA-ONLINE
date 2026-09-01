@@ -73,14 +73,23 @@ export default function Register() {
   }
 
   return (
-    <div className="card">
-      <h3>Register</h3>
-      <p>
-        Fill in your details below to join the ECOSA members list
-        automatically.
-      </p>
+    <div className="page-stack">
+      <section className="card section-hero">
+        <div>
+          <span className="eyebrow">Alumni</span>
+          <h1 style={{ margin: '10px 0 8px' }}>Register</h1>
+          <p className="muted" style={{ margin: 0, maxWidth: '70ch', lineHeight: 1.8 }}>
+            Fill in your details below to join the ECOSA alumni directory automatically.
+          </p>
+        </div>
+        <div className="hero-metric" style={{ minWidth: 220 }}>
+          <strong>Process</strong>
+          <span>Fast and direct alumni registration</span>
+        </div>
+      </section>
 
-      <form onSubmit={submit}>
+      <div className="card">
+      <form onSubmit={submit} className="dashboard-form">
         <label>Name</label>
         <input
           value={name}
@@ -201,6 +210,7 @@ export default function Register() {
           </button>
         </div>
       </form>
+      </div>
     </div>
   )
 }

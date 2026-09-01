@@ -129,7 +129,7 @@ export default function Header() {
               </NavLink>
 
               <NavLink to="/projects" onClick={closeMenus}>
-                Projects
+                Initiatives
               </NavLink>
 
               <NavLink to="/resources" onClick={closeMenus}>

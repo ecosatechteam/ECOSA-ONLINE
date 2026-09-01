@@ -18,7 +18,7 @@ function generateReceiptPdf(member, payment) {
   doc.text(`Amount: ${payment.amount} ${payment.currency}`)
   doc.text(`Method: ${payment.method}`)
   doc.text(`Status: ${payment.status}`)
-  doc.text(`Membership Number: ${member.membershipNumber || 'Pending'}`)
+  doc.text(`Alumni Number: ${member.membershipNumber || 'Pending'}`)
   doc.end()
 
   return { filePath, fileName }

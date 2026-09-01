@@ -35,31 +35,40 @@ export default function Leaders(){
   const filtered = leaders.filter(l=> l.name.toLowerCase().includes(search.toLowerCase()) || (l.role||'').toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <div>
-      <h3>ECOSA Leaders</h3>
-      <div style={{display:'flex',gap:12,alignItems:'center',marginBottom:12}}>
+    <div className="page-stack">
+      <section className="card section-hero">
         <div>
-          <label>Regime</label>
-          <select value={regime} onChange={e=>setRegime(e.target.value)}>
-            {availableRegimes.map(r=> <option key={r} value={r}>{r}</option>)}
-          </select>
+          <span className="eyebrow">Leadership</span>
+          <h1 style={{ margin: '10px 0 8px' }}>ECOSA Leaders</h1>
+          <p className="muted" style={{ margin: 0, maxWidth: '70ch', lineHeight: 1.8 }}>
+            A clear roster of the association’s leadership, presented in a more polished and readable layout.
+          </p>
         </div>
-        <div>
-          <label>Search</label>
-          <input placeholder="Search name or role" value={search} onChange={e=>setSearch(e.target.value)} />
-        </div>
-      </div>
 
-      {filtered.map(l=> (
-        <div key={l.id} className="card" style={{marginBottom:8}}>
+        <div className="section-actions">
           <div>
-            <div style={{fontWeight:700}}>{l.name}</div>
-            <div style={{color:'#6b7280'}}>{l.role}</div>
-            <div style={{marginTop:8}}>{l.bio}</div>
-            {l.regime && <div style={{fontSize:12,color:'#9ca3af',marginTop:6}}>Regime: {l.regime}</div>}
+            <label>Regime</label>
+            <select value={regime} onChange={e=>setRegime(e.target.value)}>
+              {availableRegimes.map(r=> <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+          <div>
+            <label>Search</label>
+            <input placeholder="Search name or role" value={search} onChange={e=>setSearch(e.target.value)} />
           </div>
         </div>
-      ))}
+      </section>
+
+      <section className="feature-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+        {filtered.map(l=> (
+          <article key={l.id} className="card feature-card">
+            <span className="feature-kicker">{l.regime || 'current'}</span>
+            <h3>{l.name}</h3>
+            <p style={{ margin: '0 0 10px' }}>{l.role}</p>
+            <p>{l.bio}</p>
+          </article>
+        ))}
+      </section>
     </div>
   )
 }

@@ -45,19 +45,19 @@ const Footer: React.FC = () => {
 
           <Link to="/">Home</Link>
           <Link to="/about">About ECOSA</Link>
-          <Link to="/leaders">Leadership</Link>
-          <Link to="/projects">Projects</Link>
+          <Link to="/leaders">Leadership Team</Link>
+          <Link to="/projects">Initiatives</Link>
           <Link to="/resources">Resources</Link>
         </div>
 
         {/* Membership */}
         <div className="footer-links">
-          <h4>Membership</h4>
+          <h4>Alumni Network</h4>
 
-          <Link to="/register">Register</Link>
-          <Link to="/members">Members Directory</Link>
-          <Link to="/chapters">Chapters</Link>
-          <Link to="/payments">Membership Payments</Link>
+          <Link to="/register">Join ECOSA</Link>
+          <Link to="/members">Alumni Directory</Link>
+          <Link to="/chapters">Alumni Chapters</Link>
+          <Link to="/payments">Alumni Payments</Link>
         </div>
 
         {/* Community */}

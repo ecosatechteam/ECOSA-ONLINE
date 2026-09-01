@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { getSession, sharePost, addRsvp } from '../services/mockService'
+import { getSession, sharePost } from '../services/mockService'
 import { Link } from 'react-router-dom'
 import MemberLink from './MemberLink'
 
@@ -16,11 +16,6 @@ function formatTime(iso?: string) {
 
 export default function PostCard({post,refresh}:{post:any,refresh?:()=>void}){
   const session = getSession()
-
-  const postRsvps = post.rsvps || []
-  const userRsvp = session ? (postRsvps.find((r:any)=>r.user=== (session.name || session.email))?.status) : undefined
-
-  const countRsvp = (s:'interested'|'going') => postRsvps.filter((r:any)=>r.status===s).length
 
   const media = post.media
   const mediaIsVideo = !!(media && typeof media === 'object' && !Array.isArray(media) && media.kind === 'video') || (typeof media === 'string' && media.startsWith('data:video/'))
@@ -53,12 +48,6 @@ export default function PostCard({post,refresh}:{post:any,refresh?:()=>void}){
     await sharePost(post.id, session.name || session.email)
     refresh && refresh()
     alert('Post shared to community')
-  }
-
-  const setRsvp = async (status:'interested'|'going')=>{
-    if(!session) return alert('Login to RSVP')
-    await addRsvp(post.id, session.name || session.email, status)
-    refresh && refresh()
   }
 
   return (
@@ -98,8 +87,6 @@ export default function PostCard({post,refresh}:{post:any,refresh?:()=>void}){
       )}
 
       <div style={{display:'flex',gap:8,marginTop:8,alignItems:'center'}}>
-        <button className="btn" onClick={()=>setRsvp('interested')}>Interested ({countRsvp('interested')})</button>
-        <button className="btn" onClick={()=>setRsvp('going')}>Going ({countRsvp('going')})</button>
         {actionUrl ? (
           actionUrl.startsWith('/') ? (
             <Link className="btn" to={actionUrl}>{actionLabel || 'Open'}</Link>

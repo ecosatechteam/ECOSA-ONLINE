@@ -24,14 +24,14 @@ export default function Projects(){
   return (
     <div>
       <div className="card">
-        <h3>Projects</h3>
+        <h3>Initiatives</h3>
         <p>Featured and active ECOSA initiatives. Use the buttons below to contribute or donate.</p>
       </div>
       <section className="card" style={{ marginTop: 24 }}>
-        <h3>Featured Projects</h3>
+        <h3>Featured Initiatives</h3>
         <div style={{ display: 'grid', gap: 12 }}>
           {featuredProjects.length === 0 ? (
-            <div className="dashboard-empty">No projects published yet.</div>
+            <div className="dashboard-empty">No initiatives published yet.</div>
           ) : featuredProjects.map((project) => (
             <div key={project.id} style={{ padding: 14, background: '#fafafa', borderRadius: 12, border: '1px solid rgba(0,0,0,.08)' }}>
               <strong>{project.title}</strong>
@@ -43,10 +43,10 @@ export default function Projects(){
       </section>
 
       <section className="card" style={{ marginTop: 24 }}>
-        <h3>All Projects</h3>
+        <h3>All Initiatives</h3>
         <div style={{ display: 'grid', gap: 12 }}>
           {projects.length === 0 ? (
-            <div className="dashboard-empty">No projects published yet.</div>
+            <div className="dashboard-empty">No initiatives published yet.</div>
           ) : projects.map((project) => (
             <div key={project.id} style={{ padding: 14, background: '#fff', borderRadius: 12, border: '1px solid rgba(0,0,0,.06)' }}>
               <strong>{project.title}</strong>
@@ -59,7 +59,7 @@ export default function Projects(){
 
       <div style={{ marginTop: 18, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
         <button type="button" className="btn" onClick={() => navigate('/payments?purpose=Project+Donation')}>
-          Contribute your pay
+          Contribute your dues
         </button>
         <button type="button" className="btn" onClick={() => navigate('/payments?purpose=Project+Donation')}>
           Donate

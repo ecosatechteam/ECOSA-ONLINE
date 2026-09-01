@@ -15,48 +15,31 @@ export default function Chapters() {
   }, [])
 
   return (
-    <div>
-      <div className="card">
-        <h2>ECOSA Chapters</h2>
-        <p>
-          ECOSA Chapters provide opportunities for alumni to network,
-          mentor one another, organize community activities, and support
-          the objectives of the Association.
-        </p>
-      </div>
+    <div className="page-stack">
+      <section className="card section-hero">
+        <div>
+          <span className="eyebrow">Alumni Chapters</span>
+          <h1 style={{ margin: '10px 0 8px' }}>ECOSA Chapters</h1>
+          <p className="muted" style={{ margin: 0, maxWidth: '74ch', lineHeight: 1.8 }}>
+            ECOSA Chapters provide opportunities for alumni to network, mentor one another, organize community activities, and support the objectives of the Association.
+          </p>
+        </div>
+      </section>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '20px',
-          marginTop: '20px'
-        }}
-      >
+      <div className="feature-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
         {chapters.map((chapter) => (
-          <div key={chapter.name} className="card">
+          <article key={chapter.name} className="card feature-card">
+            <span className="feature-kicker">{chapter.status || 'Active'}</span>
             <h3>{chapter.name} Chapter</h3>
-
             <p>{chapter.description}</p>
-
-            <hr />
-
-            <p>
-              <strong>Chairperson:</strong> {chapter.chairperson}
-            </p>
-
-            <p>
-              <strong>Registered Members:</strong> {chapter.members}
-            </p>
-
-            <p>
-              <strong>Status:</strong> {chapter.status || 'Active'}
-            </p>
-
-            <button className="btn" disabled>
+            <div className="dashboard-list-meta" style={{ marginTop: 12 }}>
+              <div><strong>Chairperson:</strong> {chapter.chairperson}</div>
+              <div><strong>Members:</strong> {chapter.members}</div>
+            </div>
+            <button className="btn" disabled style={{ marginTop: 16 }}>
               Coming Soon
             </button>
-          </div>
+          </article>
         ))}
       </div>
     </div>

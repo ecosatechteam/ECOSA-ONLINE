@@ -15,6 +15,7 @@ import {
   getPosts,
   getProjects,
   getResources,
+  saveMember,
   saveChapter,
   saveLeader,
   saveProject,
@@ -197,6 +198,21 @@ export default function Dashboard() {
     }
   }
 
+  const handleMemberStatusChange = async (member: any, status: 'paid' | 'pending') => {
+    const updatedMember = {
+      ...member,
+      paymentStatus: status,
+      confirmedAt: status === 'paid' ? member.confirmedAt || new Date().toISOString() : member.confirmedAt,
+      membershipNumber:
+        status === 'paid'
+          ? member.membershipNumber || `EC-${Date.now().toString().slice(-6)}`
+          : member.membershipNumber,
+    }
+
+    await saveMember(updatedMember)
+    await loadData()
+  }
+
   const resetChapterForm = () => {
     setChapterForm({
       id: '',
@@ -224,7 +240,7 @@ export default function Dashboard() {
   const handleChapterSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!chapterForm.name || !chapterForm.description) {
-      alert('Add a chapter name and description')
+      alert('Add an alumni chapter name and description')
       return
     }
 
@@ -247,7 +263,7 @@ export default function Dashboard() {
   }
 
   const handleDeleteChapter = async (chapterId: string) => {
-    if (!confirm('Delete this chapter?')) return
+    if (!confirm('Delete this alumni chapter?')) return
     await deleteChapter(chapterId)
     await loadData()
   }
@@ -275,7 +291,7 @@ export default function Dashboard() {
   const handleLeaderSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!leaderForm.name || !leaderForm.role) {
-      alert('Add a leader name and role')
+      alert('Add a leadership name and role')
       return
     }
 
@@ -290,7 +306,7 @@ export default function Dashboard() {
   }
 
   const handleDeleteLeader = async (leaderId: string) => {
-    if (!confirm('Delete this leader entry?')) return
+    if (!confirm('Delete this leadership entry?')) return
     await deleteLeader(leaderId)
     await loadData()
   }
@@ -318,7 +334,7 @@ export default function Dashboard() {
   const handleProjectSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!projectForm.title || !projectForm.description) {
-      alert('Add a project title and description')
+      alert('Add an initiative title and description')
       return
     }
 
@@ -333,7 +349,7 @@ export default function Dashboard() {
   }
 
   const handleDeleteProject = async (projectId: string) => {
-    if (!confirm('Delete this project?')) return
+    if (!confirm('Delete this initiative?')) return
     await deleteProject(projectId)
     await loadData()
   }
@@ -375,7 +391,7 @@ export default function Dashboard() {
   }
 
   const handleDeleteResource = async (resourceId: string) => {
-    if (!confirm('Delete this document?')) return
+    if (!confirm('Delete this resource?')) return
     await deleteResource(resourceId)
     await loadData()
   }
@@ -391,8 +407,8 @@ export default function Dashboard() {
     { label: 'Pending reviews', value: pendingMembers.length },
     { label: 'Payments', value: payments.length },
     { label: 'Published updates', value: posts.length },
-    { label: 'Leaders', value: leaders.length },
-    { label: 'Projects', value: projects.length },
+    { label: 'Leadership', value: leaders.length },
+    { label: 'Initiatives', value: projects.length },
     { label: 'Resources', value: resources.length },
     { label: 'Chapters', value: chapters.length },
   ]
@@ -402,7 +418,7 @@ export default function Dashboard() {
     payments: { title: 'Confirm payments', description: 'Approve successful payments to move a member into the verified directory.' },
     chapters: { title: 'Manage chapters', description: 'Create or update chapter profiles that appear on the public chapters page.' },
     leaders: { title: 'Manage leaders', description: 'Update the leadership roster shown on the public leaders page.' },
-    projects: { title: 'Manage projects', description: 'Update the active project list shown on the public projects page.' },
+    projects: { title: 'Manage projects', description: 'Update the active initiative list shown on the public projects page.' },
     resources: { title: 'Manage resources', description: 'Upload official documents and remove outdated files from the shared resource library.' },
     updates: { title: 'Publish updates', description: 'Post announcements, events, and jobs for the community feed.' },
   } as const
@@ -482,12 +498,13 @@ export default function Dashboard() {
                       <th>Chapter</th>
                       <th>Status</th>
                       <th>Membership No.</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {visibleMembers.length === 0 ? (
                       <tr>
-                        <td colSpan={5}><div className="dashboard-empty">No members in this view.</div></td>
+                        <td colSpan={6}><div className="dashboard-empty">No members in this view.</div></td>
                       </tr>
                     ) : visibleMembers.map((member) => (
                       <tr key={member.id || member.email}>
@@ -503,6 +520,22 @@ export default function Dashboard() {
                           </span>
                         </td>
                         <td>{member.membershipNumber || 'Pending approval'}</td>
+                        <td>
+                          <div className="dashboard-actions">
+                            <button className="btn secondary" type="button" onClick={() => window.location.assign(`/members/${encodeURIComponent(member.id)}`)}>
+                              View
+                            </button>
+                            {(member.paymentStatus || '').toLowerCase() === 'paid' ? (
+                              <button className="btn secondary" type="button" onClick={() => handleMemberStatusChange(member, 'pending')}>
+                                Mark pending
+                              </button>
+                            ) : (
+                              <button className="btn" type="button" onClick={() => handleMemberStatusChange(member, 'paid')}>
+                                Mark paid
+                              </button>
+                            )}
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -617,7 +650,7 @@ export default function Dashboard() {
               <form className="dashboard-form" onSubmit={handleLeaderSubmit}>
                 <div className="dashboard-inline-row">
                   <div>
-                    <label>Leader name</label>
+                    <label>Leadership name</label>
                     <input value={leaderForm.name} onChange={(e) => setLeaderForm((prev) => ({ ...prev, name: e.target.value }))} placeholder="Agaba Francis" />
                   </div>
                   <div>
@@ -671,7 +704,7 @@ export default function Dashboard() {
               <form className="dashboard-form" onSubmit={handleProjectSubmit}>
                 <div className="dashboard-inline-row">
                   <div>
-                    <label>Project title</label>
+                    <label>Initiative title</label>
                     <input value={projectForm.title} onChange={(e) => setProjectForm((prev) => ({ ...prev, title: e.target.value }))} placeholder="ECOSA SACCO" />
                   </div>
                   <div>
@@ -704,7 +737,7 @@ export default function Dashboard() {
 
               <div className="dashboard-list" style={{ marginTop: 16 }}>
                 {projects.length === 0 ? (
-                  <div className="dashboard-empty">No projects saved yet.</div>
+                  <div className="dashboard-empty">No initiatives saved yet.</div>
                 ) : projects.map((project) => (
                   <div key={project.id} className="dashboard-list-item">
                     <div>
@@ -760,7 +793,7 @@ export default function Dashboard() {
                     <div>
                       <strong>{resource.name}</strong>
                       <div>{resource.type}</div>
-                      <div className="dashboard-list-meta">Uploaded {formatDate(resource.uploadedAt)} by {resource.uploadedBy || 'Administrator'}</div>
+                      <div className="dashboard-list-meta">Uploaded {formatDate(resource.uploadedAt)} by {resource.uploadedBy || 'ECOSA leadership'}</div>
                     </div>
                     <div className="dashboard-actions">
                       <a className="btn secondary" href={resource.content} download={resource.filename}>Download</a>

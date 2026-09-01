@@ -6,76 +6,71 @@ const Home: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <>
-      <div className="card">
-        <h2>Welcome to ECOSA Online</h2>
+    <div className="home-page">
+      <section className="hero-shell card">
+        <div className="hero-copy">
+          <div className="eyebrow">ECOSA Online</div>
+          <h1>One polished home for ECOSA membership, updates, and initiatives.</h1>
+          <p className="hero-lead">
+            Equatorial College Old Students Association is built as a focused platform for registration, payments, leadership, initiatives, and community communication.
+          </p>
 
-        <p>
-          Equatorial College Old Students Association — your alumni hub for
-          registration, projects, payments and networking.
-        </p>
+          <div className="hero-actions">
+            <Link className="btn" to="/register">Register</Link>
+            <Link className="btn secondary" to="/payments">Pay Membership (UGX 20,000)</Link>
+            <Link className="btn secondary" to="/community">Community</Link>
+            <Link className="btn secondary" to="/members">Members Search</Link>
+          </div>
 
-        <ul>
-          <li>
-            <strong>Register as an alumnus:</strong> Submit your details and
-            join the ECOSA members list automatically.
-          </li>
-
-          <li>
-            <strong>Pay membership fees:</strong> Complete membership payments
-            and get added to the members registry.
-          </li>
-
-          <li>
-            <strong>View community announcements:</strong> Receive official
-            ECOSA updates in a read-only feed.
-          </li>
-
-          <li>
-            <strong>See current projects:</strong> Explore featured initiatives
-            and contribute or donate with one click.
-          </li>
-        </ul>
-
-        <div
-          style={{
-            marginTop: 12,
-            display: 'flex',
-            gap: 8,
-            flexWrap: 'wrap',
-          }}
-        >
-          <Link className="btn" to="/register">
-            Register
-          </Link>
-
-          <Link className="btn" to="/payments">
-            Pay Membership (UGX 20,000)
-          </Link>
-
-          <Link className="btn" to="/community">
-            Community
-          </Link>
-
-          <Link className="btn" to="/members">
-            Members Search
-          </Link>
-
-          <Link className="btn" to="/projects">
-    Projects
-  </Link>
+          <div className="hero-points">
+            <div>
+              <strong>Fast onboarding</strong>
+              <span>Submit your details and join the registry.</span>
+            </div>
+            <div>
+              <strong>Official updates</strong>
+              <span>Read announcements, events, and jobs in one feed.</span>
+            </div>
+            <div>
+              <strong>Visible initiatives</strong>
+              <span>Track initiatives and contribute where needed.</span>
+            </div>
+          </div>
         </div>
-      </div>
+
+      </section>
+
+      <section className="feature-grid">
+        <article className="feature-card card">
+          <span className="feature-kicker">Membership</span>
+          <h3>Register as a member</h3>
+          <p>Submit your details and join the ECOSA members list automatically.</p>
+        </article>
+
+        <article className="feature-card card">
+          <span className="feature-kicker">Payments</span>
+          <h3>Pay with confidence</h3>
+          <p>Complete membership payments and get added to the members registry.</p>
+        </article>
+
+        <article className="feature-card card">
+          <span className="feature-kicker">Updates</span>
+          <h3>Follow official announcements</h3>
+          <p>Receive ECOSA updates in a clean, read-only community feed.</p>
+        </article>
+
+        <article className="feature-card card">
+          <span className="feature-kicker">Initiatives</span>
+          <h3>See current initiatives</h3>
+          <p>Explore featured work and contribute or donate with one click.</p>
+        </article>
+      </section>
 
       <ProjectsSection
-        onContribute={() =>
-          navigate('/payments?purpose=Project+Donation')
-        }
-        onDonate={() =>
-          navigate('/payments?purpose=Project+Donation')
-        }
+        onContribute={() => navigate('/payments?purpose=Project+Donation')}
+        onDonate={() => navigate('/payments?purpose=Project+Donation')}
       />
-    </>
+    </div>
   );
 };
 

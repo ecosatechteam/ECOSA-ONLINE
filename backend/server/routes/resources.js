@@ -9,7 +9,7 @@ const defaultResources = [
     filename: 'centenary-account.txt',
     mime: 'text/plain',
     type: 'bank',
-    content: 'data:text/plain;charset=utf-8,' + encodeURIComponent('Centenary Bank\nAccount Name: ECOSA\nAccount Number: 3100111822\nPlease use your membership name as reference.'),
+    content: 'data:text/plain;charset=utf-8,' + encodeURIComponent('Centenary Bank\nAccount Name: ECOSA\nAccount Number: 3100111822\nPlease use your alumni name as reference.'),
     uploadedAt: new Date().toISOString(),
     uploadedBy: 'Agaba Francis'
   }

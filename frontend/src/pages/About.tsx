@@ -2,97 +2,71 @@ import React from "react";
 
 export default function About() {
   return (
-    <div className="card">
-      <h1>What is ECOSA?</h1>
+    <div className="page-stack">
+      <section className="card section-hero">
+        <div>
+          <span className="eyebrow">About ECOSA</span>
+          <h1 style={{ margin: '10px 0 8px' }}>What is ECOSA?</h1>
+          <p className="muted" style={{ margin: 0, maxWidth: '74ch', lineHeight: 1.8 }}>
+            ECOSA is the official alumni association of former students of Equatorial College Ibanda. It exists to connect alumni, strengthen support networks, and promote lifelong collaboration.
+          </p>
+        </div>
+        <div className="hero-metric" style={{ minWidth: 220 }}>
+          <strong>Founded</strong>
+          <span>2023 URSB registration</span>
+        </div>
+      </section>
 
-      <p>
-        <strong>
-          ECOSA (Equatorial College Ibanda Old Students Association)
-        </strong>{" "}
-        is the official alumni association of former students of{" "}
-        <strong>Equatorial College Ibanda</strong>. The Association brings
-        together alumni to foster lifelong friendships, networking,
-        mentorship, collaboration, and mutual support while empowering
-        members to transform their lives and positively impact their
-        communities.
-      </p>
+      <section className="feature-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+        <article className="card feature-card">
+          <span className="feature-kicker">Motto</span>
+          <h3>Together for a Brighter Future.</h3>
+          <p>Our motto captures the spirit of collective growth, support, and shared progress.</p>
+        </article>
 
-      <p>
-        Guided by our motto,
-        <strong> "Together for a Brighter Future."</strong> ECOSA provides a
-        platform where alumni reconnect, share opportunities, support one
-        another, and work together for personal, professional, social, and
-        economic transformation.
-      </p>
+        <article className="card feature-card">
+          <span className="feature-kicker">Vision</span>
+          <h3>United and empowered alumni.</h3>
+          <p>We aim to build an influential alumni community that transforms lives and communities.</p>
+        </article>
 
-      <hr />
+        <article className="card feature-card">
+          <span className="feature-kicker">Mission</span>
+          <h3>Connect, empower, and serve.</h3>
+          <p>Networking, mentorship, partnerships, and service guide everything ECOSA does.</p>
+        </article>
 
-      <h2>Our Motto</h2>
-      <p>
-        <strong>Together for a Brighter Future.</strong>
-      </p>
+        <article className="card feature-card">
+          <span className="feature-kicker">Values</span>
+          <h3>Unity, integrity, professionalism.</h3>
+          <p>These core values keep the association accountable and forward-looking.</p>
+        </article>
+      </section>
 
-      <h2>Our Vision</h2>
-      <p>
-        To build a united, empowered, and influential community of alumni of{" "}
-        <strong>Equatorial College Ibanda</strong> that transforms the lives
-        of its members and contributes to the sustainable development of
-        their communities.
-      </p>
+      <section className="card">
+        <div className="dashboard-section-head" style={{ marginBottom: 14 }}>
+          <div>
+            <h2 style={{ margin: 0 }}>Our Story</h2>
+            <p className="muted" style={{ margin: '6px 0 0', lineHeight: 1.8 }}>
+              ECOSA traces its roots to the 2022 alumni reunion, where members elected an interim committee to establish the association and complete its registration.
+            </p>
+          </div>
+        </div>
 
-      <h2>Our Mission</h2>
-      <p>
-        To connect and empower alumni of{" "}
-        <strong>Equatorial College Ibanda</strong> through networking,
-        mentorship, lifelong learning, partnerships, and community service
-        while creating opportunities that improve the social, professional,
-        and economic well-being of members and the communities they serve.
-      </p>
+        <div className="page-stack" style={{ gap: 14 }}>
+          <p style={{ margin: 0, lineHeight: 1.8 }}>
+            The committee developed the constitution, governance structures, and legal registration process that led to ECOSA being officially recognized by the Uganda Registration Services Bureau in 2023.
+          </p>
 
-      <hr />
-
-      <h2>Our History</h2>
-
-      <p>
-        ECOSA traces its roots to the historic{" "}
-        <strong>Equatorial College Ibanda Alumni Reunion</strong> held in{" "}
-        <strong>2022</strong>, where former students gathered to reconnect,
-        renew friendships, and discuss the need for a formal alumni
-        association.
-      </p>
-
-      <p>
-        During the reunion, members democratically elected an{" "}
-        <strong>Interim Executive Committee</strong> and entrusted it with
-        the responsibility of establishing the Association. The committee
-        developed the Association's Constitution, governance structures, and
-        coordinated the legal registration process.
-      </p>
-
-      <p>
-        These efforts culminated in the successful registration of the{" "}
-        <strong>
-          Equatorial College Ibanda Old Students Association (ECOSA)
-        </strong>{" "}
-        with the <strong>Uganda Registration Services Bureau (URSB)</strong>{" "}
-        in <strong>2023</strong>, making ECOSA a legally recognized alumni
-        association committed to uniting alumni, supporting its members, and
-        serving society.
-      </p>
-
-      <hr />
-
-      <h2>Our Core Values</h2>
-
-      <ul>
-        <li>Unity</li>
-        <li>Integrity</li>
-        <li>Professionalism</li>
-        <li>Service</li>
-        <li>Accountability</li>
-        <li>Innovation</li>
-        <li>Teamwork</li>
-      </ul>
+          <div className="dashboard-list" style={{ marginTop: 4 }}>
+            {['Unity', 'Integrity', 'Professionalism', 'Service', 'Accountability', 'Innovation', 'Teamwork'].map((value) => (
+              <div key={value} className="dashboard-list-item">
+                <strong>{value}</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

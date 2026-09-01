@@ -11,13 +11,27 @@ export default function MembersList(){
     return ()=>{ mounted=false }
   },[])
   return (
-    <div>
-      <h3>Members ({members.length})</h3>
-      <div style={{marginBottom:12}}>
-        <input placeholder="Search members by name" value={query} onChange={e=>setQuery(e.target.value)} style={{padding:8,width:'100%',maxWidth:480}} />
+    <div className="page-stack">
+      <section className="card section-hero">
+        <div>
+          <span className="eyebrow">Directory</span>
+          <h1 style={{ margin: '10px 0 8px' }}>Members ({members.length})</h1>
+          <p className="muted" style={{ margin: 0, lineHeight: 1.8 }}>
+            Search the members directory and view member profiles in a clean, readable layout.
+          </p>
+        </div>
+        <div className="section-actions" style={{ minWidth: 320 }}>
+          <div>
+            <label>Search</label>
+            <input placeholder="Search members by name" value={query} onChange={e=>setQuery(e.target.value)} />
+          </div>
+        </div>
+      </section>
+
+      <div className="page-stack">
+        {members.length===0 && <div className="card dashboard-empty">No members yet — invite colleagues to join ECOSA</div>}
+        {members.filter(m=> (m.name||'').toLowerCase().includes(query.toLowerCase())).map((m,i)=> <MemberCard key={m.id} member={m} index={i+1} />)}
       </div>
-      {members.length===0 && <div className="card">No members yet — invite colleagues to join ECOSA</div>}
-      {members.filter(m=> (m.name||'').toLowerCase().includes(query.toLowerCase())).map((m,i)=> <MemberCard key={m.id} member={m} index={i+1} />)}
     </div>
   )
 }
