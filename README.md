@@ -121,3 +121,4 @@ The repository includes `netlify.toml` for Netlify static hosting.
 - The frontend is designed to work both as a demo using local browser storage and as a frontend to an Express backend.
 - If you want a production-ready API, deploy the backend separately and configure `VITE_API_BASE` to point to that service.
 - `backend/server/index.js` will still start if MongoDB is unavailable, but data persistence will depend on whether it can connect to the configured database.
+# ECOSA-ONLINE
