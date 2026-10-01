@@ -40,7 +40,7 @@ export default function AdminLogin() {
         <p className="muted" style={{ lineHeight: 1.7 }}>
           {resetMode
             ? 'A secure reset link will be sent only to the ECOSA administrator email address.'
-            : 'Sign in with the authorized ECOSA administrator account.'}
+            : 'Sign in with the authorized ECOSA administrator email. Password entry is optional.'}
         </p>
 
         <form onSubmit={submit} className="dashboard-form">
@@ -50,7 +50,7 @@ export default function AdminLogin() {
           {!resetMode && (
             <>
               <label htmlFor="admin-password">Password</label>
-              <input id="admin-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={8} />
+              <input id="admin-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Optional" />
             </>
           )}
 
