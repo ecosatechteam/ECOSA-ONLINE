@@ -40,17 +40,17 @@ export default function AdminLogin() {
         <p className="muted" style={{ lineHeight: 1.7 }}>
           {resetMode
             ? 'A secure reset link will be sent only to the ECOSA administrator email address.'
-            : 'Select Log in to open the administrator dashboard. Credentials are optional.'}
+            : 'Login to manage admin dashboard'}
         </p>
 
         <form onSubmit={submit} className="dashboard-form">
           <label htmlFor="admin-email">Admin email</label>
-          <input id="admin-email" placeholder={`${ADMIN_EMAIL} (optional)`} />
+          <input id="admin-email" placeholder={ADMIN_EMAIL} />
 
           {!resetMode && (
             <>
               <label htmlFor="admin-password">Password</label>
-              <input id="admin-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Optional" />
+              <input id="admin-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
             </>
           )}
 
