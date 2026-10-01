@@ -512,16 +512,6 @@ export async function getJobs() {
     return await api('/jobs')
   } catch {
     return readPosts()
-    const seen = new Set<string>()
-    return readPosts()
-    for (const j of raw) {
-      const key = j.id || `${j.title}:::${j.desc}:::${j.poster}`
-      if (!seen.has(key)) {
-        seen.add(key)
-        out.push(j)
-      }
-    }
-    return out
   }
 }
 
