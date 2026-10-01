@@ -28,6 +28,7 @@ export type Chapter = {
 }
 
 const SESS_KEY = 'ecosa_session'
+const ADMIN_TOKEN_KEY = 'ecosa_admin_token'
 const CHAPTERS_KEY = 'ecosa_chapters'
 const DEFAULT_CHAPTERS: Chapter[] = [
   { id: 'chap_kampala', name: 'Kampala', chairperson: 'TBA', members: 0, status: 'Active', description: 'The Kampala Chapter brings together ECOSA members living and working in Kampala and the surrounding areas.' },
@@ -44,9 +45,14 @@ const DEFAULT_CHAPTERS: Chapter[] = [
 async function api(path: string, opts?: any) {
   const base = import.meta.env.VITE_API_BASE || 'http://localhost:4000/api'
   try {
-    const res = await fetch(base + path, opts)
+    const headers = new Headers(opts?.headers || {})
+    const token = localStorage.getItem(ADMIN_TOKEN_KEY)
+    if (token) headers.set('Authorization', `Bearer ${token}`)
+    const res = await fetch(base + path, { ...opts, headers })
     if (res.ok) return res.json()
-    throw new Error('API error')
+    const error = new Error('API error') as Error & { status?: number }
+    error.status = res.status
+    throw error
   } catch (e) {
     return Promise.reject(e)
   }
@@ -60,6 +66,40 @@ export function logout() {
   localStorage.removeItem(SESS_KEY)
 }
 
+export function getAdminToken() {
+  return localStorage.getItem(ADMIN_TOKEN_KEY)
+}
+
+export function adminLogout() {
+  localStorage.removeItem(ADMIN_TOKEN_KEY)
+}
+
+export async function adminLogin(email: string, password: string) {
+  const res = await api('/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  })
+  if (res?.token) localStorage.setItem(ADMIN_TOKEN_KEY, res.token)
+  return res
+}
+
+export async function requestAdminPasswordReset(email: string) {
+  return api('/auth/forgot-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
+}
+
+export async function resetAdminPassword(token: string, password: string) {
+  return api('/auth/reset-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, password }),
+  })
+}
+
 // Auth
 export async function authLogin(email: string, password?: string) {
   try {
@@ -68,6 +108,7 @@ export async function authLogin(email: string, password?: string) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     })
+    if (res?.token) localStorage.setItem(ADMIN_TOKEN_KEY, res.token)
     localStorage.setItem(SESS_KEY, JSON.stringify({ email }))
     return res
   } catch (e) {
@@ -381,7 +422,7 @@ export async function registerMember(m: any) {
   if (!m.membershipNumber) m.membershipNumber = `EC-${Date.now()}`
   if (!m.registeredAt) m.registeredAt = new Date().toISOString()
   try {
-    return await api('/members', {
+    return await api('/members/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(m),

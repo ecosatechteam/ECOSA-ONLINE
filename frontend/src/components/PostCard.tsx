@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { getSession, sharePost } from '../services/mockService'
 import { Link } from 'react-router-dom'
 import MemberLink from './MemberLink'
 
@@ -15,8 +14,6 @@ function formatTime(iso?: string) {
 }
 
 export default function PostCard({post,refresh}:{post:any,refresh?:()=>void}){
-  const session = getSession()
-
   const media = post.media
   const mediaIsVideo = !!(media && typeof media === 'object' && !Array.isArray(media) && media.kind === 'video') || (typeof media === 'string' && media.startsWith('data:video/'))
   const mediaSrc = typeof media === 'string'
@@ -42,13 +39,6 @@ export default function PostCard({post,refresh}:{post:any,refresh?:()=>void}){
       : post.registerUrl || post.actionUrl
 
   const tag = (post.type || 'announcement').toString().toUpperCase()
-
-  const handleShare = async ()=>{
-    if(!session) return alert('Login to share')
-    await sharePost(post.id, session.name || session.email)
-    refresh && refresh()
-    alert('Post shared to community')
-  }
 
   return (
     <div className="card" style={{marginBottom:12}}>
@@ -94,7 +84,6 @@ export default function PostCard({post,refresh}:{post:any,refresh?:()=>void}){
             <a className="btn" style={{textDecoration:'none'}} href={actionUrl} target="_blank" rel="noreferrer">{actionLabel || 'Open'}</a>
           )
         ) : null}
-        <button className="btn" onClick={handleShare}>Share</button>
       </div>
 
     </div>

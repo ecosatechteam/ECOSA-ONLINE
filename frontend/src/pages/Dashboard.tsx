@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   addPost,
   addResource,
@@ -19,6 +20,7 @@ import {
   saveChapter,
   saveLeader,
   saveProject,
+  adminLogout,
 } from '../services/mockService'
 
 function formatDate(value?: string) {
@@ -28,6 +30,7 @@ function formatDate(value?: string) {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate()
   const [members, setMembers] = useState<any[]>([])
   const [payments, setPayments] = useState<any[]>([])
   const [posts, setPosts] = useState<any[]>([])
@@ -433,6 +436,7 @@ export default function Dashboard() {
           <p>Review members, confirm payments, manage chapters and resources, and publish official updates from one control center.</p>
         </div>
         <div className="dashboard-hero-actions">
+          <button type="button" className="btn secondary" onClick={() => { adminLogout(); navigate('/admin/login', { replace: true }) }}>Log out</button>
           <button type="button" className={`btn${activePanel === 'members' ? ' secondary' : ''}`} onClick={() => setActivePanel('members')}>Review members</button>
           <button type="button" className={`btn${activePanel === 'payments' ? ' secondary' : ''}`} onClick={() => setActivePanel('payments')}>Confirm payments</button>
           <button type="button" className={`btn${activePanel === 'chapters' ? ' secondary' : ''}`} onClick={() => setActivePanel('chapters')}>Manage chapters</button>

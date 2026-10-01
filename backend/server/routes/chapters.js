@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { clone, listChapters, upsertChapter, removeChapter } = require('../utils/store')
+const authMiddleware = require('../middleware/auth')
 
 const defaultChapters = [
   { id: 'chap_kampala', name: 'Kampala', chairperson: 'TBA', members: 0, status: 'Active', description: 'The Kampala Chapter brings together ECOSA members living and working in Kampala and the surrounding areas.' },
@@ -29,7 +30,7 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const chapter = {
       ...req.body,
@@ -43,7 +44,7 @@ router.post('/', async (req, res) => {
   }
 })
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const chapter = {
       ...req.body,
@@ -57,7 +58,7 @@ router.put('/:id', async (req, res) => {
   }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     removeChapter(req.params.id)
     res.json({ ok: true })

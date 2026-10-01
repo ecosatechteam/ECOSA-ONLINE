@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { clone, listProjects, upsertProject, removeProject } = require('../utils/store')
+const authMiddleware = require('../middleware/auth')
 
 const defaultProjects = [
   { id: 'proj_sacco', title: 'ECOSA SACCO', description: 'A member-owned savings and credit cooperative helping alumni save, access loans, and build financial security together.', status: 'Ongoing', featured: true },
@@ -27,7 +28,7 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const project = {
       ...req.body,
@@ -41,7 +42,7 @@ router.post('/', async (req, res) => {
   }
 })
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const project = {
       ...req.body,
@@ -55,7 +56,7 @@ router.put('/:id', async (req, res) => {
   }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     removeProject(req.params.id)
     res.json({ ok: true })

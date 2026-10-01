@@ -1,6 +1,19 @@
 const fs = require('fs')
 const path = require('path')
 const PDFDocument = require('pdfkit')
+const nodemailer = require('nodemailer')
+
+const mailTransport = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASSWORD
+  ? nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT || 587),
+      secure: String(process.env.SMTP_SECURE || '').toLowerCase() === 'true',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    })
+  : null
 
 function generateReceiptPdf(member, payment) {
   const fileName = `receipt_${payment._id || Date.now()}.pdf`
@@ -37,7 +50,17 @@ async function sendWhatsApp(phone, message) {
 }
 
 async function sendEmail(to, subject, html) {
-  console.log(`[Email] to ${to}: ${subject}`)
+  if (!mailTransport) {
+    console.warn(`[Email not sent: SMTP is not configured] to ${to}: ${subject}`)
+    return { ok: false, reason: 'SMTP is not configured' }
+  }
+
+  await mailTransport.sendMail({
+    from: process.env.MAIL_FROM || process.env.SMTP_USER,
+    to,
+    subject,
+    html,
+  })
   return { ok: true }
 }
 

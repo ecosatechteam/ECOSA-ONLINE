@@ -4,6 +4,7 @@ const Payment = require('../models/Payment')
 const Member = require('../models/Member')
 const { upsertPayment, listPayments, upsertMember, listMembers } = require('../utils/store')
 const { generateReceiptPdf, sendSms, sendWhatsApp, sendEmail } = require('../utils/notifications')
+const authMiddleware = require('../middleware/auth')
 
 function seedPayments() {
   if (listPayments().length > 0) return
@@ -69,7 +70,7 @@ router.post('/initiate', async (req, res) => {
   }
 })
 
-router.patch('/:id/confirm', async (req, res) => {
+router.patch('/:id/confirm', authMiddleware, async (req, res) => {
   try {
     const now = new Date().toISOString()
     const { reference = '' } = req.body || {}

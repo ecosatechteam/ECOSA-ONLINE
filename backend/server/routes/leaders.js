@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { clone, listLeaders, upsertLeader, removeLeader } = require('../utils/store')
+const authMiddleware = require('../middleware/auth')
 
 const defaultLeaders = [
   { id: 'l_chair', name: 'Omuteeganda Adson', role: 'Chair (Interim)', regime: 'current', bio: 'Leads the interim ECOSA executive and oversees administrative coordination.' },
@@ -29,7 +30,7 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const leader = {
       ...req.body,
@@ -43,7 +44,7 @@ router.post('/', async (req, res) => {
   }
 })
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const leader = {
       ...req.body,
@@ -57,7 +58,7 @@ router.put('/:id', async (req, res) => {
   }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     removeLeader(req.params.id)
     res.json({ ok: true })

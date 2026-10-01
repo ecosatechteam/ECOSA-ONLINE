@@ -1,3 +1,15 @@
+# ECOSA
+
+## Admin authentication
+
+The dashboard is available only to `ecosaadmin@gmail.com`. Configure these backend environment variables before deployment:
+
+- `ADMIN_INITIAL_PASSWORD`: creates the first admin password when no admin record exists.
+- `JWT_SECRET`: secret used to sign dashboard sessions.
+- `PUBLIC_APP_URL`: public frontend URL used in password-reset links.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, and optional `SMTP_SECURE` / `MAIL_FROM`: SMTP settings for sending reset links to `ecosaadmin@gmail.com`.
+
+Password reset links expire after 15 minutes and can be used once. Public website pages, member registration, and payment initiation remain accessible without an admin login.
 # ECOSA Online
 
 ECOSA Online is a React + TypeScript single-page application built with Vite for the Equatorial College Old Students Association. It supports alumni registration, member discovery, membership payments, community posts, job listings, leadership details, chapters, resources, and project donation workflows.

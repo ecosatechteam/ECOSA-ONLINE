@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { clone, listResources, upsertResource, removeResource } = require('../utils/store')
+const authMiddleware = require('../middleware/auth')
 
 const defaultResources = [
   {
@@ -30,7 +31,7 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const resource = {
       ...req.body,
@@ -43,7 +44,7 @@ router.post('/', async (req, res) => {
   }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     removeResource(req.params.id)
     res.json({ ok: true })

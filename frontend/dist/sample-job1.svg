@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200" viewBox="0 0 600 200">
+  <rect width="600" height="200" fill="#ffffff" stroke="#e5e7eb" />
+  <text x="20" y="40" font-family="Arial" font-size="20" fill="#111">Job: Software Engineer</text>
+  <text x="20" y="70" font-family="Arial" font-size="14" fill="#374151">Company: TUAN Creations</text>
+  <text x="20" y="100" font-family="Arial" font-size="12" fill="#6b7280">Location: Kampala | Full-time | Apply: careers@tuancreations.com</text>
+</svg>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Navigate, Routes, Route, useLocation } from "react-router-dom";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -17,6 +17,9 @@ import Chapters from "./pages/Chapters";
 
 // Dashboard
 import Dashboard from "./pages/Dashboard";
+import AdminLogin from "./pages/AdminLogin";
+import ResetPassword from "./pages/ResetPassword";
+import { getAdminToken } from "./services/mockService";
 
 // Community
 import Community from "./pages/Community";
@@ -31,7 +34,11 @@ import Resources from "./pages/Resources";
 
 export default function App() {
   const location = useLocation();
-  const hideLayout = location.pathname.startsWith("/dashboard");
+  const hideLayout = location.pathname.startsWith("/dashboard") || location.pathname.startsWith("/admin");
+
+  const dashboard = getAdminToken()
+    ? <Dashboard />
+    : <Navigate to="/admin/login" replace />;
 
   return (
     <>
@@ -55,7 +62,9 @@ export default function App() {
           <Route path="/chapters" element={<Chapters />} />
 
           {/* Dashboard */}
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={dashboard} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/reset-password" element={<ResetPassword />} />
 
           {/* Payments */}
           <Route path="/payments" element={<Payments />} />

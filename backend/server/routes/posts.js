@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const Post = require('../models/Post')
 const { addPost: addToStore, listPosts } = require('../utils/store')
+const authMiddleware = require('../middleware/auth')
 
 function seedPosts() {
   if (listPosts().length > 0) return
@@ -35,7 +36,7 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const post = new Post(req.body)
     try {
@@ -49,7 +50,7 @@ router.post('/', async (req, res) => {
   }
 })
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const post = await Post.findByIdAndUpdate(req.params.id, req.body, { new: true })
     res.json(post)
@@ -58,7 +59,7 @@ router.put('/:id', async (req, res) => {
   }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     await Post.findByIdAndDelete(req.params.id)
     res.json({ ok: true })

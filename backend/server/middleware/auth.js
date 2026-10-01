@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 
 const JWT_SECRET = process.env.JWT_SECRET || 'ecosa-dev-secret'
+const ADMIN_EMAIL = 'ecosaadmin@gmail.com'
 
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization || ''
@@ -12,6 +13,9 @@ function authMiddleware(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET)
+    if (String(decoded.email || '').toLowerCase() !== ADMIN_EMAIL || decoded.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' })
+    }
     req.user = decoded
     next()
   } catch (err) {
