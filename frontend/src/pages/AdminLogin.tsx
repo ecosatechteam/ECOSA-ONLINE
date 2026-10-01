@@ -22,7 +22,7 @@ export default function AdminLogin() {
         await requestAdminPasswordReset(ADMIN_EMAIL)
         setMessage('If the admin email is configured, a password reset link has been sent.')
       } else {
-        await adminLogin(ADMIN_EMAIL, password)
+        await adminLogin('', password)
         navigate('/dashboard', { replace: true })
       }
     } catch {
@@ -40,12 +40,12 @@ export default function AdminLogin() {
         <p className="muted" style={{ lineHeight: 1.7 }}>
           {resetMode
             ? 'A secure reset link will be sent only to the ECOSA administrator email address.'
-            : 'Sign in with the authorized ECOSA administrator email. Password entry is optional.'}
+            : 'Select Log in to open the administrator dashboard. Credentials are optional.'}
         </p>
 
         <form onSubmit={submit} className="dashboard-form">
           <label htmlFor="admin-email">Admin email</label>
-          <input id="admin-email" value={ADMIN_EMAIL} readOnly />
+          <input id="admin-email" placeholder={`${ADMIN_EMAIL} (optional)`} />
 
           {!resetMode && (
             <>

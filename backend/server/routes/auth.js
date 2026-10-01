@@ -59,7 +59,8 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { password } = req.body
+    const email = normalizeEmail(req.body?.email) || ADMIN_EMAIL
     if (!isAllowedEmail(email)) return res.status(401).json({ message: 'Invalid credentials' })
     let admin = await findAdmin()
     if (!admin) {
