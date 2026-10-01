@@ -61,20 +61,15 @@ router.post('/login', async (req, res) => {
   try {
     const { password } = req.body
     const email = normalizeEmail(req.body?.email) || ADMIN_EMAIL
-    if (!isAllowedEmail(email)) return res.status(401).json({ message: 'Invalid credentials' })
-    let admin = await findAdmin()
-    if (!admin) {
-      admin = await ensureAdmin(password || process.env.ADMIN_INITIAL_PASSWORD || crypto.randomBytes(32).toString('hex'))
-    }
-    if (!admin) return res.status(401).json({ message: 'Invalid credentials' })
+    const admin = email === ADMIN_EMAIL ? await findAdmin() : null
 
-    if (password) {
+    if (admin && password) {
       const valid = await bcrypt.compare(password, admin.passwordHash)
       if (!valid) return res.status(401).json({ message: 'Invalid credentials' })
     }
 
-    const token = jwt.sign({ id: admin._id || admin.email, email: ADMIN_EMAIL, role: 'admin' }, JWT_SECRET, { expiresIn: '8h' })
-    res.json({ ok: true, token, admin: { id: admin._id || admin.email, email: admin.email, name: admin.name || 'Admin' } })
+    const token = jwt.sign({ id: admin?._id || email, email, role: 'admin' }, JWT_SECRET, { expiresIn: '8h' })
+    res.json({ ok: true, token, admin: { id: admin?._id || email, email, name: admin?.name || 'Admin' } })
   } catch (err) {
     res.status(500).json({ message: 'Login failed' })
   }

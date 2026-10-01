@@ -6,6 +6,7 @@ const ADMIN_EMAIL = 'ecosaadmin@gmail.com'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [resetMode, setResetMode] = useState(false)
   const [message, setMessage] = useState('')
@@ -22,7 +23,7 @@ export default function AdminLogin() {
         await requestAdminPasswordReset(ADMIN_EMAIL)
         setMessage('If the admin email is configured, a password reset link has been sent.')
       } else {
-        await adminLogin('', password)
+        await adminLogin(email, password)
         navigate('/dashboard', { replace: true })
       }
     } catch {
@@ -45,7 +46,7 @@ export default function AdminLogin() {
 
         <form onSubmit={submit} className="dashboard-form">
           <label htmlFor="admin-email">Admin email</label>
-          <input id="admin-email" placeholder={ADMIN_EMAIL} />
+          <input id="admin-email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder={ADMIN_EMAIL} />
 
           {!resetMode && (
             <>
