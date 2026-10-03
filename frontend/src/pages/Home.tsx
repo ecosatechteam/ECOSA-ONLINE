@@ -1,75 +1,199 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import ProjectsSection from '../components/ProjectsSection';
+import { Link } from 'react-router-dom';
+
+const heroSlideImages = Object.values(
+  import.meta.glob('../assets/hero-slides/*.{jpg,jpeg,png,webp,avif}', {
+    eager: true,
+    import: 'default',
+  }),
+) as string[];
+
+const quickActions = [
+  {
+    icon: '👤',
+    title: 'Register',
+    description: 'Join the ECOSA community and become part of a global network of alumni.',
+    to: '/register',
+    accent: 'green',
+  },
+  {
+    icon: '👥',
+    title: 'Alumni Network',
+    description: 'Connect with fellow alumni, expand your professional network, and find new opportunities.',
+    to: '/members',
+    accent: 'blue',
+  },
+  {
+    icon: '💬',
+    title: 'Community',
+    description: 'Engage with your peers, join discussions, and be part of a vibrant alumni community.',
+    to: '/community',
+    accent: 'purple',
+  },
+  {
+    icon: '💡',
+    title: 'Impact Projects',
+    description: 'Support and get involved in initiatives that create lasting change in our communities.',
+    to: '/projects',
+    accent: 'gold',
+  },
+  {
+    icon: '🏅',
+    title: 'Leaders',
+    description: 'Meet the people guiding the ECOSA vision and leadership agenda.',
+    to: '/leaders',
+    accent: 'green',
+  },
+  {
+    icon: '📚',
+    title: 'Resources',
+    description: 'Access tools, opportunities, and information useful to members and graduates.',
+    to: '/resources',
+    accent: 'blue',
+  },
+  {
+    icon: '📍',
+    title: 'Chapters',
+    description: 'Find active ECOSA chapters and connect with alumni in your region.',
+    to: '/chapters',
+    accent: 'purple',
+  },
+  {
+    icon: '🤝',
+    title: 'Donation',
+    description: 'Support ECOSA projects and sustain initiatives that benefit the wider community.',
+    to: '/payments?purpose=Project+Donation',
+    accent: 'gold',
+  },
+];
+
+const reasons = [
+  { icon: '🤝', title: 'Stay Connected', description: 'Reunite with classmates and build new relationships.' },
+  { icon: '📚', title: 'Grow Professionally', description: 'Access resources, mentorship and career opportunities.' },
+  { icon: '💡', title: 'Make an Impact', description: 'Support initiatives that create real change.' },
+  { icon: '🌍', title: 'Global Reach', description: 'A growing network of alumni across the world.' },
+  { icon: '💛', title: 'Give Back', description: 'Share your knowledge, experience and support.' },
+  { icon: '🤝', title: 'Stronger Together', description: 'Because our success is built on each other.' },
+];
 
 const Home: React.FC = () => {
-  const navigate = useNavigate();
-
   return (
     <div className="home-page">
-      <section className="hero-shell card">
-        <div className="hero-copy">
-          <div className="eyebrow">ECOSA Online</div>
-          <h1>Welcome to ECOSA Online.</h1>
-          <p className="hero-lead">
-            A welcoming digital home for ECOSA alumni to register, stay informed, explore projects, and follow official association updates in one polished place.
+      <section className="home-hero card">
+        <div className="home-hero-copy">
+          <div className="home-hero-tag">ECOSA</div>
+          <h1>
+            Welcome to
+            <span> ECOSA Online</span>
+          </h1>
+          <p>
+            The Equatorial College Old Students Association (ECOSA) brings together former students of
+            Equatorial College School – Ibanda, fostering lifelong connections, supporting one another,
+            and creating opportunities to make a positive impact in our communities.
           </p>
+          <Link className="home-primary-btn" to="/about">
+            Explore ECOSA <span>→</span>
+          </Link>
+        </div>
 
-          <div className="hero-actions">
-            <Link className="btn" to="/register">Register</Link>
-            <Link className="btn secondary" to="/payments">Pay Membership (UGX 20,000)</Link>
-            <Link className="btn secondary" to="/community">Community</Link>
-            <Link className="btn secondary" to="/members">Members Search</Link>
+        <div className="home-hero-visual" aria-label="ECOSA campus view">
+          <div className="home-hero-slider">
+            {(heroSlideImages.length ? heroSlideImages : [
+              'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80',
+              'https://images.unsplash.com/photo-1541339907198-e9a9d86d7b9d?auto=format&fit=crop&w=1200&q=80',
+              'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80',
+            ]).map((image, index) => (
+              <div
+                key={`${image}-${index}`}
+                className="home-hero-slide"
+                style={{
+                  backgroundImage: `linear-gradient(180deg, rgba(11, 74, 148, 0.15), rgba(10, 40, 64, 0.38)), url('${image}')`,
+                  animationDelay: `${index * 6}s`,
+                }}
+              />
+            ))}
           </div>
 
-          <div className="hero-points">
-            <div>
-              <strong>Fast onboarding</strong>
-              <span>Submit your details and join the registry.</span>
-            </div>
-            <div>
-              <strong>Official updates</strong>
-              <span>Read announcements, events, and jobs in one feed.</span>
-            </div>
-            <div>
-              <strong>Visible initiatives</strong>
-              <span>Track initiatives and contribute where needed.</span>
+          <div className="home-hero-panel">
+            <div className="home-hero-panel-title">EQUATORIAL COLLEGE</div>
+            <div className="home-hero-panel-sub">IBANDA</div>
+            <div className="home-hero-panel-meta">
+              <span>DISCIPLINE</span>
+              <span>KNOWLEDGE</span>
+              <span>SERVICE</span>
             </div>
           </div>
         </div>
-
       </section>
 
-      <section className="feature-grid">
-        <Link className="feature-card card card-link" to="/register">
-          <span className="feature-kicker">Membership</span>
-          <h3>Register as a member</h3>
-          <p>Submit your details and join the ECOSA members list automatically.</p>
-        </Link>
-
-        <Link className="feature-card card card-link" to="/payments">
-          <span className="feature-kicker">Payments</span>
-          <h3>Pay with confidence</h3>
-          <p>Complete membership payments and keep your record active with ease.</p>
-        </Link>
-
-        <Link className="feature-card card card-link" to="/community">
-          <span className="feature-kicker">Updates</span>
-          <h3>Follow official announcements</h3>
-          <p>Receive ECOSA updates in a clean, read-only community feed.</p>
-        </Link>
-
-        <Link className="feature-card card card-link" to="/projects">
-          <span className="feature-kicker">ECOSA Projects</span>
-          <h3>See current projects</h3>
-          <p>Explore featured work and contribute or donate with one click.</p>
-        </Link>
+      <section className="home-actions-grid">
+        {quickActions.map((action) => (
+          <Link key={action.title} className={`home-action-card ${action.accent}`} to={action.to}>
+            <div className="home-action-icon">{action.icon}</div>
+            <h3>{action.title}</h3>
+            <p>{action.description}</p>
+            <span className="home-action-link">
+              {action.title === 'Register'
+                ? 'Get started'
+                : action.title === 'Alumni Network'
+                  ? 'Explore network'
+                  : action.title === 'Community'
+                    ? 'Join the community'
+                    : action.title === 'Leaders'
+                      ? 'Meet leaders'
+                      : action.title === 'Resources'
+                        ? 'View resources'
+                        : action.title === 'Chapters'
+                          ? 'Explore chapters'
+                          : action.title === 'Donation'
+                            ? 'Donate now'
+                            : 'Learn more'}
+              <span> →</span>
+            </span>
+          </Link>
+        ))}
       </section>
 
-      <ProjectsSection
-        onContribute={() => navigate('/payments?purpose=Project+Donation')}
-        onDonate={() => navigate('/payments?purpose=Project+Donation')}
-      />
+      <section className="home-why">
+        <div className="home-why-intro">
+          <h2>
+            Why ECOSA?<br />
+            <span>More than an alumni association — a lifelong community.</span>
+          </h2>
+          <p>
+            ECOSA is a network of passionate graduates committed to supporting each other, driving
+            opportunity, and creating social impact.
+          </p>
+          <Link className="home-primary-btn alt" to="/about">
+            About ECOSA <span>→</span>
+          </Link>
+        </div>
+
+        <div className="home-value-grid">
+          {reasons.map((reason) => (
+            <div key={reason.title} className="home-value-card">
+              <div className="home-value-icon">{reason.icon}</div>
+              <h3>{reason.title}</h3>
+              <p>{reason.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="home-banner">
+        <div className="home-banner-copy">
+          <h3>Once a member, always part of ECOSA.</h3>
+          <p>Reconnect • Support • Build the future</p>
+          <Link className="home-banner-btn" to="/register">
+            Join ECOSA <span>→</span>
+          </Link>
+        </div>
+
+        <div className="home-banner-badge">
+          <span>Same Spirit</span>
+          <span>LifeLong Bonds</span>
+        </div>
+      </section>
     </div>
   );
 };
