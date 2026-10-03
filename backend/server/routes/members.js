@@ -43,7 +43,12 @@ router.get('/', async (req, res) => {
     }
 
     const members = await Member.find(query).sort({ createdAt: -1 }).catch(() => [])
-    const result = members.length ? members : listMembers().filter((m) => m.paymentStatus === 'paid' || m.membershipNumber)
+    const storedMembers = members.length
+      ? members.map((member) => (member.toObject ? member.toObject() : member))
+      : listMembers().filter((member) => member.paymentStatus === 'paid' || member.membershipNumber)
+    const storedIds = new Set(storedMembers.map((member) => member.id || member.membershipNumber || String(member._id)))
+    const rosterMembers = defaultMembers.filter((member) => !storedIds.has(member.id))
+    const result = [...storedMembers, ...rosterMembers]
     res.json(result)
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch members' })

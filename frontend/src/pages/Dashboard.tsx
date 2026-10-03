@@ -29,6 +29,10 @@ function formatDate(value?: string) {
   return isNaN(date.getTime()) ? 'Unknown' : date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
+const START_YEAR = 2002
+const CURRENT_YEAR = new Date().getFullYear()
+const YEAR_OPTIONS = Array.from({ length: CURRENT_YEAR - START_YEAR + 1 }, (_, index) => CURRENT_YEAR - index)
+
 export default function Dashboard() {
   const navigate = useNavigate()
   const [members, setMembers] = useState<any[]>([])
@@ -40,6 +44,7 @@ export default function Dashboard() {
   const [projects, setProjects] = useState<any[]>([])
   const [activePanel, setActivePanel] = useState<'members' | 'payments' | 'chapters' | 'leaders' | 'projects' | 'resources' | 'updates' | null>(null)
   const [memberFilter, setMemberFilter] = useState<'all' | 'pending' | 'paid'>('all')
+  const [showMemberForm, setShowMemberForm] = useState(false)
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'pending' | 'paid'>('pending')
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
@@ -54,6 +59,7 @@ export default function Dashboard() {
   const [resourceType, setResourceType] = useState('other')
   const [resourceFile, setResourceFile] = useState<File | null>(null)
   const [savingResource, setSavingResource] = useState(false)
+  const [savingMember, setSavingMember] = useState(false)
   const [savingChapter, setSavingChapter] = useState(false)
   const [savingLeader, setSavingLeader] = useState(false)
   const [savingProject, setSavingProject] = useState(false)
@@ -79,6 +85,18 @@ export default function Dashboard() {
     description: '',
     status: 'Ongoing',
     featured: false,
+  })
+  const [memberForm, setMemberForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    employment: '',
+    chapter: '',
+    yearFrom: '',
+    yearTo: '',
+    hasBusiness: false,
+    businessName: '',
+    businessDescription: '',
   })
 
   async function loadData() {
@@ -214,6 +232,40 @@ export default function Dashboard() {
 
     await saveMember(updatedMember)
     await loadData()
+  }
+
+  const handleMemberSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!memberForm.name || !memberForm.email || !memberForm.chapter) {
+      alert('Add the member name, email, and chapter')
+      return
+    }
+
+    setSavingMember(true)
+    try {
+      await saveMember({
+        id: `member-${Date.now()}`,
+        name: memberForm.name,
+        email: memberForm.email,
+        phone: memberForm.phone,
+        chapter: memberForm.chapter,
+        yearsAtECI: memberForm.yearFrom && memberForm.yearTo
+          ? `${memberForm.yearFrom}-${memberForm.yearTo}`
+          : memberForm.yearFrom || memberForm.yearTo || '',
+        employment: memberForm.employment,
+        hasBusiness: memberForm.hasBusiness,
+        businessName: memberForm.hasBusiness ? memberForm.businessName : undefined,
+        businessDescription: memberForm.hasBusiness ? memberForm.businessDescription : undefined,
+        paymentStatus: 'pending',
+        registeredAt: new Date().toISOString(),
+      } as any)
+      setMemberForm({ name: '', email: '', phone: '', employment: '', chapter: '', yearFrom: '', yearTo: '', hasBusiness: false, businessName: '', businessDescription: '' })
+      setShowMemberForm(false)
+      await loadData()
+      alert('Member registered successfully')
+    } finally {
+      setSavingMember(false)
+    }
   }
 
   const resetChapterForm = () => {
@@ -489,10 +541,78 @@ export default function Dashboard() {
           {activePanel === 'members' && (
             <div>
               <div className="dashboard-toolbar" style={{ marginBottom: 12 }}>
-                <button type="button" className={`field-btn${memberFilter === 'all' ? ' active' : ''}`} onClick={() => setMemberFilter('all')}>All</button>
-                <button type="button" className={`field-btn${memberFilter === 'pending' ? ' active' : ''}`} onClick={() => setMemberFilter('pending')}>Pending</button>
-                <button type="button" className={`field-btn${memberFilter === 'paid' ? ' active' : ''}`} onClick={() => setMemberFilter('paid')}>Paid</button>
+                <button type="button" className={`field-btn${memberFilter === 'all' && !showMemberForm ? ' active' : ''}`} onClick={() => { setMemberFilter('all'); setShowMemberForm(false) }}>All</button>
+                <button type="button" className={`field-btn${memberFilter === 'pending' && !showMemberForm ? ' active' : ''}`} onClick={() => { setMemberFilter('pending'); setShowMemberForm(false) }}>Pending</button>
+                <button type="button" className={`field-btn${memberFilter === 'paid' && !showMemberForm ? ' active' : ''}`} onClick={() => { setMemberFilter('paid'); setShowMemberForm(false) }}>Paid</button>
+                <button type="button" className={`field-btn${showMemberForm ? ' active' : ''}`} onClick={() => setShowMemberForm(true)}>Register</button>
               </div>
+              {showMemberForm && (
+                <form className="dashboard-card dashboard-member-form" onSubmit={handleMemberSubmit}>
+                  <div className="dashboard-section-head">
+                    <div>
+                      <h4>Register a member</h4>
+                      <p className="muted">Add an alumni record directly to the directory for payment review.</p>
+                    </div>
+                  </div>
+                  <div className="dashboard-inline-row">
+                    <div>
+                      <label htmlFor="dashboard-member-name">Name</label>
+                      <input id="dashboard-member-name" value={memberForm.name} onChange={(event) => setMemberForm({ ...memberForm, name: event.target.value })} required />
+                    </div>
+                    <div>
+                      <label htmlFor="dashboard-member-email">Email</label>
+                      <input id="dashboard-member-email" type="email" value={memberForm.email} onChange={(event) => setMemberForm({ ...memberForm, email: event.target.value })} required />
+                    </div>
+                    <div>
+                      <label htmlFor="dashboard-member-phone">Phone</label>
+                      <input id="dashboard-member-phone" value={memberForm.phone} onChange={(event) => setMemberForm({ ...memberForm, phone: event.target.value })} />
+                    </div>
+                    <div>
+                      <label htmlFor="dashboard-member-chapter">Chapter</label>
+                      <select id="dashboard-member-chapter" value={memberForm.chapter} onChange={(event) => setMemberForm({ ...memberForm, chapter: event.target.value })} required>
+                        <option value="">Select chapter</option>
+                        {chapters.map((chapter) => <option key={chapter.id || chapter.name} value={chapter.name}>{chapter.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label>Years at ECI</label>
+                      <div className="dashboard-inline-row dashboard-year-fields">
+                        <select aria-label="Year from" value={memberForm.yearFrom} onChange={(event) => setMemberForm({ ...memberForm, yearFrom: event.target.value })}>
+                          <option value="">From</option>
+                          {YEAR_OPTIONS.map((year) => <option key={`from-${year}`} value={year}>{year}</option>)}
+                        </select>
+                        <select aria-label="Year to" value={memberForm.yearTo} onChange={(event) => setMemberForm({ ...memberForm, yearTo: event.target.value })}>
+                          <option value="">To</option>
+                          {YEAR_OPTIONS.map((year) => <option key={`to-${year}`} value={year}>{year}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label htmlFor="dashboard-member-employment">Profession/Career</label>
+                      <input id="dashboard-member-employment" value={memberForm.employment} onChange={(event) => setMemberForm({ ...memberForm, employment: event.target.value })} />
+                    </div>
+                  </div>
+                  <label className="dashboard-checkbox-label">
+                    <input type="checkbox" checked={memberForm.hasBusiness} onChange={(event) => setMemberForm({ ...memberForm, hasBusiness: event.target.checked })} />
+                    I own a business
+                  </label>
+                  {memberForm.hasBusiness && (
+                    <div className="dashboard-inline-row">
+                      <div>
+                        <label htmlFor="dashboard-member-business-name">Business Name</label>
+                        <input id="dashboard-member-business-name" value={memberForm.businessName} onChange={(event) => setMemberForm({ ...memberForm, businessName: event.target.value })} />
+                      </div>
+                      <div>
+                        <label htmlFor="dashboard-member-business-description">What does your business do?</label>
+                        <input id="dashboard-member-business-description" value={memberForm.businessDescription} onChange={(event) => setMemberForm({ ...memberForm, businessDescription: event.target.value })} />
+                      </div>
+                    </div>
+                  )}
+                  <div className="actions">
+                    <button className="btn" type="submit" disabled={savingMember}>{savingMember ? 'Saving member...' : 'Register member'}</button>
+                  </div>
+                </form>
+              )}
               <div className="dashboard-table-wrap">
                 <table className="dashboard-table">
                   <thead>

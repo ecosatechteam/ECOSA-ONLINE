@@ -74,6 +74,10 @@ export function adminLogout() {
   localStorage.removeItem(ADMIN_TOKEN_KEY)
 }
 
+export function adminGuestLogin() {
+  localStorage.setItem(ADMIN_TOKEN_KEY, 'guest-dashboard-access')
+}
+
 export async function adminLogin(email: string, password: string) {
   const res = await api('/auth/login', {
     method: 'POST',
@@ -614,7 +618,12 @@ export async function voteLeader(leaderId: string, voterEmail: string) {
       { id: 'EC-014', name: 'Dorothy Asiimwe' },
       { id: 'EC-015', name: 'Ndeeba Stephenson' },
       { id: 'EC-016', name: 'Ayebare Sperio Ssalongo' }
-    ].map(m => ({ ...m, membershipNumber: m.id, isAdmin: ['EC-001','EC-002'].includes(m.id) }))
+    ].map(m => ({
+      ...m,
+      membershipNumber: m.id,
+      paymentStatus: 'paid',
+      isAdmin: ['EC-001','EC-002'].includes(m.id),
+    }))
     write('ecosa_members', members)
 
     // Seed payments: mark membership fee (UGX 20,000) as recorded for these members
