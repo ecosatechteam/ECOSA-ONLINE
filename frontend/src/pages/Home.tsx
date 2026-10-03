@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const heroSlideImages = Object.values(
@@ -7,6 +7,14 @@ const heroSlideImages = Object.values(
     import: 'default',
   }),
 ) as string[];
+
+const fallbackHeroImages = [
+  'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1541339907198-e9a9d86d7b9d?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80',
+];
+
+const slides = heroSlideImages.length ? heroSlideImages : fallbackHeroImages;
 
 const quickActions = [
   {
@@ -77,6 +85,20 @@ const reasons = [
 ];
 
 const Home: React.FC = () => {
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  useEffect(() => {
+    if (slides.length < 2) {
+      return undefined;
+    }
+
+    const slideTimer = window.setInterval(() => {
+      setActiveSlide((currentSlide) => (currentSlide + 1) % slides.length);
+    }, 6000);
+
+    return () => window.clearInterval(slideTimer);
+  }, []);
+
   return (
     <div className="home-page">
       <section className="home-hero card">
@@ -98,17 +120,12 @@ const Home: React.FC = () => {
 
         <div className="home-hero-visual" aria-label="ECOSA campus view">
           <div className="home-hero-slider">
-            {(heroSlideImages.length ? heroSlideImages : [
-              'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80',
-              'https://images.unsplash.com/photo-1541339907198-e9a9d86d7b9d?auto=format&fit=crop&w=1200&q=80',
-              'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80',
-            ]).map((image, index) => (
+            {slides.map((image, index) => (
               <div
                 key={`${image}-${index}`}
-                className="home-hero-slide"
+                className={`home-hero-slide${index === activeSlide ? ' active' : ''}`}
                 style={{
                   backgroundImage: `linear-gradient(180deg, rgba(11, 74, 148, 0.15), rgba(10, 40, 64, 0.38)), url('${image}')`,
-                  animationDelay: `${index * 6}s`,
                 }}
               />
             ))}
@@ -161,8 +178,8 @@ const Home: React.FC = () => {
             <span>More than an alumni association — a lifelong community.</span>
           </h2>
           <p>
-            ECOSA is a network of passionate graduates committed to supporting each other, driving
-            opportunity, and creating social impact.
+            ECOSA is a network of passionate professional graduates, businessmen, industry and global
+            leaders committed to supporting each other, driving opportunity, and creating social impact.
           </p>
           <Link className="home-primary-btn alt" to="/about">
             About ECOSA <span>→</span>
