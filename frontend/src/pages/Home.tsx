@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import schoolCrest from '../assets/school-crest.png';
 
 const heroSlideImages = Object.values(
   import.meta.glob('../assets/hero-slides/*.{jpg,jpeg,png,webp,avif}', {
@@ -132,13 +133,22 @@ const Home: React.FC = () => {
           </div>
 
           <div className="home-hero-panel">
+            <img className="home-school-crest" src={schoolCrest} alt="Equatorial College School crest" />
             <div className="home-hero-panel-title">EQUATORIAL COLLEGE</div>
-            <div className="home-hero-panel-sub">IBANDA</div>
+            <div className="home-hero-panel-sub">SCHOOL - IBANDA</div>
             <div className="home-hero-panel-meta">
               <span>DISCIPLINE</span>
               <span>KNOWLEDGE</span>
               <span>SERVICE</span>
             </div>
+            <a
+              className="home-school-link"
+              href="https://ecs.ac.ug/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Visit our former school website <span aria-hidden="true">↗</span>
+            </a>
           </div>
         </div>
       </section>

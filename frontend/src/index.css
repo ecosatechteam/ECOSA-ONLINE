@@ -858,6 +858,14 @@ select:focus {
   backdrop-filter: blur(6px);
 }
 
+.home-school-crest {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 10px;
+  object-fit: contain;
+  border-radius: 14px;
+}
+
 .home-hero-panel-title,
 .home-hero-panel-sub {
   text-align: center;
@@ -886,6 +894,29 @@ select:focus {
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
+}
+
+.home-school-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #0f4bd6;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-align: center;
+  transition: transform var(--transition), background var(--transition);
+}
+
+.home-school-link:hover {
+  background: #0b3da9;
+  color: #ffffff;
+  transform: translateY(-2px);
 }
 
 .home-actions-grid {
