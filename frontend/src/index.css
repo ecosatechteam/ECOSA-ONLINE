@@ -1241,7 +1241,7 @@ select:focus {
   }
 
   .header-top {
-    align-items: flex-start;
+    align-items: center;
   }
 
   .header-title {
@@ -1714,6 +1714,8 @@ select:focus {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex: 0 0 auto;
+    margin: 0;
   }
 
   .header-bar {
@@ -1723,7 +1725,7 @@ select:focus {
 
   .header-nav {
     position: absolute;
-    top: 100%;
+    top: calc(100% - 1px);
     left: 0;
     right: 0;
     height: min(620px, calc(100dvh - 120px));

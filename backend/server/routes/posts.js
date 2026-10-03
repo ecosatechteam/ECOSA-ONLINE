@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const Post = require('../models/Post')
-const { addPost: addToStore, listPosts } = require('../utils/store')
+const { addPost: addToStore, listPosts, isDbConnected } = require('../utils/store')
 const authMiddleware = require('../middleware/auth')
 
 function seedPosts() {
@@ -29,7 +29,9 @@ function seedPosts() {
 router.get('/', async (req, res) => {
   try {
     seedPosts()
-    const posts = await Post.find({ isPublished: true }).sort({ createdAt: -1 }).catch(() => [])
+    const posts = isDbConnected()
+      ? await Post.find({ isPublished: true }).sort({ createdAt: -1 }).catch(() => [])
+      : []
     res.json(posts.length ? posts : listPosts())
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch posts' })

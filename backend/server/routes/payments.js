@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const Payment = require('../models/Payment')
 const Member = require('../models/Member')
-const { upsertPayment, listPayments, upsertMember, listMembers } = require('../utils/store')
+const { upsertPayment, listPayments, upsertMember, listMembers, isDbConnected } = require('../utils/store')
 const { generateReceiptPdf, sendSms, sendWhatsApp, sendEmail } = require('../utils/notifications')
 const authMiddleware = require('../middleware/auth')
 
@@ -37,7 +37,9 @@ function generateMembershipNumber() {
 router.get('/', async (req, res) => {
   try {
     seedPayments()
-    const payments = await Payment.find().sort({ createdAt: -1 }).catch(() => [])
+    const payments = isDbConnected()
+      ? await Payment.find().sort({ createdAt: -1 }).catch(() => [])
+      : []
     res.json(payments.length ? payments : listPayments())
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch payments' })

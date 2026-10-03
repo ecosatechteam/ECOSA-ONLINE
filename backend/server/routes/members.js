@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const Member = require('../models/Member')
-const { upsertMember, listMembers, clone } = require('../utils/store')
+const { upsertMember, listMembers, clone, isDbConnected } = require('../utils/store')
 const authMiddleware = require('../middleware/auth')
 
 const defaultMembers = [
@@ -42,7 +42,9 @@ router.get('/', async (req, res) => {
       delete query.paymentStatus
     }
 
-    const members = await Member.find(query).sort({ createdAt: -1 }).catch(() => [])
+    const members = isDbConnected()
+      ? await Member.find(query).sort({ createdAt: -1 }).catch(() => [])
+      : []
     const storedMembers = members.length
       ? members.map((member) => (member.toObject ? member.toObject() : member))
       : listMembers().filter((member) => member.paymentStatus === 'paid' || member.membershipNumber)
