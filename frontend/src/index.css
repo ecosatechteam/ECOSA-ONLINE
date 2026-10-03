@@ -1728,14 +1728,15 @@ select:focus {
     top: calc(100% - 1px);
     left: 0;
     right: 0;
-    height: min(620px, calc(100dvh - 120px));
+    height: auto;
     max-height: calc(100dvh - 120px);
-    overflow-y: scroll;
+    overflow-y: auto;
     overscroll-behavior: contain;
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
     background: rgba(255, 255, 255, 0.98);
     flex-direction: column;
+    justify-content: flex-start;
     gap: 12px;
     padding: 16px;
     box-shadow: 0 24px 50px rgba(0, 0, 0, 0.12);
