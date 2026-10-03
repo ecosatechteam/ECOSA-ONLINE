@@ -62,6 +62,12 @@ export default function Header() {
       document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    document.body.classList.toggle("mobile-menu-open", open);
+
+    return () => document.body.classList.remove("mobile-menu-open");
+  }, [open]);
+
   return (
     <header className="card header-bar" style={{ margin: "12px" }}>
       <div className="container nav">

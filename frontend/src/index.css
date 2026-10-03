@@ -39,6 +39,10 @@ body {
   min-height: 100vh;
 }
 
+body.mobile-menu-open {
+  overflow: hidden;
+}
+
 img {
   max-width: 100%;
   display: block;
@@ -1731,10 +1735,12 @@ select:focus {
     height: auto;
     max-height: calc(100dvh - 120px);
     overflow-y: auto;
+    align-content: flex-start;
     overscroll-behavior: contain;
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
-    background: rgba(255, 255, 255, 0.98);
+    background: #ffffff;
+    z-index: 1001;
     flex-direction: column;
     justify-content: flex-start;
     gap: 12px;
