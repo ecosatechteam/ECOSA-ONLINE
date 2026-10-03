@@ -23,7 +23,8 @@ export default function Community(){
           <span className="eyebrow">Community</span>
           <h1 style={{ margin: '10px 0 8px' }}>Alumni Updates</h1>
           <p className="muted" style={{ margin: 0, maxWidth: '72ch', lineHeight: 1.8 }}>
-            Latest announcements from ECOSA leadership, presented in a clean read-only feed.
+            Stay informed with announcements from ECOSA leadership, event updates, job opportunities,
+            and news from ECOSA chapters in one read-only feed.
           </p>
         </div>
         <div className="hero-metric" style={{ minWidth: 180 }}>
