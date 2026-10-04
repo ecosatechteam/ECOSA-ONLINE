@@ -265,6 +265,10 @@ a {
   position: relative;
 }
 
+.mobile-menu-backdrop {
+  display: none;
+}
+
 .card-link {
   color: inherit;
   transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
@@ -1906,6 +1910,48 @@ select:focus {
 }
 
 @media (max-width: 720px) {
+
+  .container.dashboard-app-main {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mobile-menu-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: default;
+  }
+
+  .dashboard-shell.has-active-panel {
+    min-height: 100dvh;
+    padding-bottom: 0;
+  }
+
+  .dashboard-shell.has-active-panel > .dashboard-hero {
+    display: none;
+  }
+
+  .dashboard-panel-full {
+    min-height: 100dvh;
+    border-radius: 0 !important;
+    padding: 16px 14px;
+  }
+
+  .dashboard-panel-back {
+    flex: 0 0 auto;
+  }
+
+  .dashboard-shell:not(.has-active-panel) {
+    padding: 0 12px 20px;
+  }
 
   .nav.container {
     display: block;

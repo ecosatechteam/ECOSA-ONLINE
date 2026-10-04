@@ -710,7 +710,7 @@ export default function Dashboard() {
   const activeMeta = activePanel ? panelMeta[activePanel] : null
 
   return (
-    <div className="dashboard-shell dashboard-grid">
+    <div className={`dashboard-shell dashboard-grid${activePanel ? ' has-active-panel' : ''}`}>
       <div className="card dashboard-hero">
         <div>
           <h3>ECOSA Admin Workspace</h3>
@@ -757,6 +757,7 @@ export default function Dashboard() {
               <h4>{activeMeta.title}</h4>
               <p className="muted">{activeMeta.description}</p>
             </div>
+            <button type="button" className="btn secondary dashboard-panel-back" onClick={() => setActivePanel(null)}>Back to overview</button>
           </div>
 
           {activePanel === 'members' && (

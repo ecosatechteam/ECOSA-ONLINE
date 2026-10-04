@@ -27,6 +27,7 @@ export default function Header() {
   const [aboutOpen, setAboutOpen] = useState(false);
   const [membershipOpen, setMembershipOpen] = useState(false);
 
+  const headerRef = useRef<HTMLElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
   const membershipRef = useRef<HTMLDivElement>(null);
 
@@ -41,6 +42,10 @@ export default function Header() {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
+        closeMenus();
+      }
+
       if (
         aboutRef.current &&
         !aboutRef.current.contains(event.target as Node)
@@ -69,44 +74,53 @@ export default function Header() {
   }, [open]);
 
   return (
-    <header className="card header-bar" style={{ margin: "12px" }}>
-      <div className="container nav">
-        <div className="header-top">
-          <Link to="/" className="header-brand" onClick={closeMenus}>
-            <img
-              src={`${logoBase}.png`}
-              alt="ECOSA Logo"
-              className="header-logo"
-              onError={(e: any) => {
-                try {
-                  if (!e.target._triedJpg) {
-                    e.target._triedJpg = true;
-                    e.target.src = `${logoBase}.jpg`;
-                  } else if (!e.target._triedJpeg) {
-                    e.target._triedJpeg = true;
-                    e.target.src = `${logoBase}.jpeg`;
-                  } else {
+    <>
+      {open && (
+        <button
+          className="mobile-menu-backdrop"
+          type="button"
+          aria-label="Close navigation menu"
+          onClick={closeMenus}
+        />
+      )}
+      <header ref={headerRef} className="card header-bar" style={{ margin: "12px" }}>
+        <div className="container nav">
+          <div className="header-top">
+            <Link to="/" className="header-brand" onClick={closeMenus}>
+              <img
+                src={`${logoBase}.png`}
+                alt="ECOSA Logo"
+                className="header-logo"
+                onError={(e: any) => {
+                  try {
+                    if (!e.target._triedJpg) {
+                      e.target._triedJpg = true;
+                      e.target.src = `${logoBase}.jpg`;
+                    } else if (!e.target._triedJpeg) {
+                      e.target._triedJpeg = true;
+                      e.target.src = `${logoBase}.jpeg`;
+                    } else {
+                      e.target.style.display = "none";
+                    }
+                  } catch {
                     e.target.style.display = "none";
                   }
-                } catch {
-                  e.target.style.display = "none";
-                }
-              }}
+                }}
+              />
+
+              <div className="header-title">
+                <strong>ECOSA</strong> — Equatorial College Old Students
+                Association
+              </div>
+            </Link>
+
+            <Hamburger
+              isOpen={open}
+              onClick={() => setOpen((prev) => !prev)}
             />
+          </div>
 
-            <div className="header-title">
-              <strong>ECOSA</strong> — Equatorial College Old Students
-              Association
-            </div>
-          </Link>
-
-          <Hamburger
-            isOpen={open}
-            onClick={() => setOpen((prev) => !prev)}
-          />
-        </div>
-
-        <nav className={`header-nav${open ? " open" : ""}`}>
+          <nav className={`header-nav${open ? " open" : ""}`}>
           {/* Home */}
           <NavLink to="/" end onClick={closeMenus}>
             Home
@@ -194,8 +208,9 @@ export default function Header() {
           <NavLink to="/contact" onClick={closeMenus}>
             Contact
           </NavLink>
-        </nav>
-      </div>
-    </header>
+          </nav>
+        </div>
+      </header>
+    </>
   );
 }

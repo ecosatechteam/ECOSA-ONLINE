@@ -45,7 +45,7 @@ export default function App() {
     <>
       {!hideLayout && <Header />}
 
-      <main className={location.pathname === '/' ? 'home-shell' : 'container'}>
+      <main className={`${location.pathname === '/' ? 'home-shell' : 'container'}${location.pathname.startsWith('/dashboard') ? ' dashboard-app-main' : ''}`}>
         <Routes>
           {/* Home */}
           <Route path="/" element={<Home />} />
