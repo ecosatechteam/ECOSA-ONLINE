@@ -14,7 +14,7 @@ export default function MemberCard({member, index}:{member:any, index?:number}){
           {member.employment && <div style={{color:'#6b7280', marginTop:6}}>{member.employment}</div>}
         </div>
         <div style={{textAlign:'right'}}>
-          <div style={{fontSize:12,color:'#6b7280'}}>{member.location || 'Location N/A'}</div>
+          <div style={{fontSize:12,color:'#6b7280'}}>{member.location || member.chapter || 'Location N/A'}</div>
         </div>
       </div>
     </div>
