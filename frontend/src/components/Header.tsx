@@ -81,6 +81,8 @@ export default function Header() {
           type="button"
           aria-label="Close navigation menu"
           onClick={closeMenus}
+          onTouchMove={closeMenus}
+          onWheel={closeMenus}
         />
       )}
       <header ref={headerRef} className="card header-bar" style={{ margin: "12px" }}>

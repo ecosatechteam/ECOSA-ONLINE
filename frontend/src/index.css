@@ -1928,6 +1928,7 @@ select:focus {
     border: 0;
     background: transparent;
     cursor: default;
+    touch-action: pan-y;
   }
 
   .dashboard-shell.has-active-panel {
