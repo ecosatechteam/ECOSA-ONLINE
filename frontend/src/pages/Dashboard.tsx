@@ -112,6 +112,7 @@ export default function Dashboard() {
   const [memberFilter, setMemberFilter] = useState<'all' | 'pending' | 'paid'>('all')
   const [showMemberForm, setShowMemberForm] = useState(false)
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'pending' | 'paid'>('pending')
+  const [showManualPaymentForm, setShowManualPaymentForm] = useState(false)
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [updateType, setUpdateType] = useState<'announcement' | 'event' | 'job'>('announcement')
@@ -756,16 +757,6 @@ export default function Dashboard() {
               <h4>{activeMeta.title}</h4>
               <p className="muted">{activeMeta.description}</p>
             </div>
-            <div className="dashboard-toolbar">
-              <button type="button" className={`field-btn${activePanel === 'members' ? ' active' : ''}`} onClick={() => setActivePanel('members')}>Members</button>
-              <button type="button" className={`field-btn${activePanel === 'payments' ? ' active' : ''}`} onClick={() => setActivePanel('payments')}>Payments</button>
-              <button type="button" className={`field-btn${activePanel === 'chapters' ? ' active' : ''}`} onClick={() => setActivePanel('chapters')}>Chapters</button>
-              <button type="button" className={`field-btn${activePanel === 'leaders' ? ' active' : ''}`} onClick={() => setActivePanel('leaders')}>Leaders</button>
-              <button type="button" className={`field-btn${activePanel === 'projects' ? ' active' : ''}`} onClick={() => setActivePanel('projects')}>Projects</button>
-              <button type="button" className={`field-btn${activePanel === 'resources' ? ' active' : ''}`} onClick={() => setActivePanel('resources')}>Resources</button>
-              <button type="button" className={`field-btn${activePanel === 'updates' ? ' active' : ''}`} onClick={() => setActivePanel('updates')}>Updates</button>
-              <button type="button" className={`field-btn${activePanel === 'hero-slides' ? ' active' : ''}`} onClick={() => setActivePanel('hero-slides')}>Hero photos</button>
-            </div>
           </div>
 
           {activePanel === 'members' && (
@@ -1062,6 +1053,20 @@ export default function Dashboard() {
 
           {activePanel === 'payments' && (
             <div>
+              <div className="dashboard-toolbar" style={{ marginBottom: 12 }}>
+                <button
+                  type="button"
+                  className={`field-btn${showManualPaymentForm ? ' active' : ''}`}
+                  aria-expanded={showManualPaymentForm}
+                  onClick={() => setShowManualPaymentForm((visible) => !visible)}
+                >
+                  {showManualPaymentForm ? 'Close payment form' : 'Record payment'}
+                </button>
+                <button type="button" className={`field-btn${paymentFilter === 'pending' ? ' active' : ''}`} onClick={() => setPaymentFilter('pending')}>Pending</button>
+                <button type="button" className={`field-btn${paymentFilter === 'paid' ? ' active' : ''}`} onClick={() => setPaymentFilter('paid')}>Paid</button>
+                <button type="button" className={`field-btn${paymentFilter === 'all' ? ' active' : ''}`} onClick={() => setPaymentFilter('all')}>All</button>
+              </div>
+              {showManualPaymentForm && (
               <form className="dashboard-form dashboard-manual-payment-form" onSubmit={handleRecordManualPayment}>
                 <div>
                   <h4>Record a member payment</h4>
@@ -1119,13 +1124,9 @@ export default function Dashboard() {
                   </button>
                 </div>
               </form>
+              )}
 
               <div className="dashboard-list" style={{ marginTop: 16 }}>
-              <div className="dashboard-toolbar" style={{ marginBottom: 12 }}>
-                <button type="button" className={`field-btn${paymentFilter === 'pending' ? ' active' : ''}`} onClick={() => setPaymentFilter('pending')}>Pending</button>
-                <button type="button" className={`field-btn${paymentFilter === 'paid' ? ' active' : ''}`} onClick={() => setPaymentFilter('paid')}>Paid</button>
-                <button type="button" className={`field-btn${paymentFilter === 'all' ? ' active' : ''}`} onClick={() => setPaymentFilter('all')}>All</button>
-              </div>
               {visiblePayments.length === 0 ? (
                 <div className="dashboard-empty">No payment records in this view.</div>
               ) : visiblePayments.map((payment) => {
