@@ -472,8 +472,8 @@ select:focus {
   margin: auto;
   padding: 56px 30px;
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
-  gap: 40px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 32px;
 }
 
 .footer-brand {
@@ -1278,7 +1278,14 @@ select:focus {
     gap: 20px;
   }
 
+  .dashboard-grid > *,
+  .dashboard-shell .dashboard-section,
+  .dashboard-section > * {
+    min-width: 0;
+  }
+
   .dashboard-shell {
+    min-width: 0;
     width: 100%;
     max-width: 1280px;
     margin-inline: auto;
@@ -1344,15 +1351,13 @@ select:focus {
     display: flex;
     flex: 1 1 100%;
     gap: 10px;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     max-width: 100%;
-    overflow-x: auto;
     padding: 4px 2px 8px;
-    scrollbar-width: thin;
   }
 
   .dashboard-hero-actions .btn {
-    flex: 0 0 auto;
+    flex: 0 1 auto;
     background: #ffffff;
     color: #0f4bd6;
     border: 1px solid rgba(255, 255, 255, 0.7);
@@ -1385,12 +1390,13 @@ select:focus {
 
   .dashboard-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+    gap: 14px;
   }
 
   .dashboard-stat {
-    min-height: 120px;
+    min-width: 0;
+    min-height: 112px;
     display: grid;
     gap: 10px;
     padding: 22px;
@@ -1414,7 +1420,7 @@ select:focus {
   }
 
   .dashboard-stat span {
-    font-size: 36px;
+    font-size: clamp(28px, 8vw, 36px);
     font-weight: 700;
     color: var(--primary);
   }
@@ -1822,8 +1828,12 @@ select:focus {
     height: 60px;
   }
 
+  .header-brand {
+    flex: 1 1 auto;
+  }
+
   .header-title {
-    font-size: 18px;
+    font-size: clamp(13px, 4vw, 18px);
   }
 
   .header-toggle {
