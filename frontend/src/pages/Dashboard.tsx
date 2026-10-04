@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import PhoneNumberInput from '../components/PhoneNumberInput'
 import {
   addPost,
   addResource,
@@ -90,6 +91,7 @@ export default function Dashboard() {
     name: '',
     email: '',
     phone: '',
+    gender: '',
     employment: '',
     chapter: '',
     yearFrom: '',
@@ -248,6 +250,7 @@ export default function Dashboard() {
         name: memberForm.name,
         email: memberForm.email,
         phone: memberForm.phone,
+        gender: memberForm.gender,
         chapter: memberForm.chapter,
         yearsAtECI: memberForm.yearFrom && memberForm.yearTo
           ? `${memberForm.yearFrom}-${memberForm.yearTo}`
@@ -259,7 +262,7 @@ export default function Dashboard() {
         paymentStatus: 'pending',
         registeredAt: new Date().toISOString(),
       } as any)
-      setMemberForm({ name: '', email: '', phone: '', employment: '', chapter: '', yearFrom: '', yearTo: '', hasBusiness: false, businessName: '', businessDescription: '' })
+      setMemberForm({ name: '', email: '', phone: '', gender: '', employment: '', chapter: '', yearFrom: '', yearTo: '', hasBusiness: false, businessName: '', businessDescription: '' })
       setShowMemberForm(false)
       await loadData()
       alert('Member registered successfully')
@@ -564,8 +567,18 @@ export default function Dashboard() {
                       <input id="dashboard-member-email" type="email" value={memberForm.email} onChange={(event) => setMemberForm({ ...memberForm, email: event.target.value })} required />
                     </div>
                     <div>
-                      <label htmlFor="dashboard-member-phone">Phone</label>
-                      <input id="dashboard-member-phone" value={memberForm.phone} onChange={(event) => setMemberForm({ ...memberForm, phone: event.target.value })} />
+                      <label htmlFor="dashboard-member-phone">Phone (select country code first)</label>
+                      <PhoneNumberInput id="dashboard-member-phone" value={memberForm.phone} onChange={(phone) => setMemberForm({ ...memberForm, phone })} />
+                    </div>
+                    <div>
+                      <label htmlFor="dashboard-member-gender">Gender</label>
+                      <select id="dashboard-member-gender" value={memberForm.gender} onChange={(event) => setMemberForm({ ...memberForm, gender: event.target.value })} required>
+                        <option value="">Select gender</option>
+                        <option value="Female">Female</option>
+                        <option value="Male">Male</option>
+                        <option value="Other">Other</option>
+                        <option value="Prefer not to say">Prefer not to say</option>
+                      </select>
                     </div>
                     <div>
                       <label htmlFor="dashboard-member-chapter">Chapter</label>

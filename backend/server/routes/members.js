@@ -20,7 +20,9 @@ const defaultMembers = [
   { id: 'EC-013', name: 'Africano' },
   { id: 'EC-014', name: 'Dorothy Asiimwe' },
   { id: 'EC-015', name: 'Ndeeba Stephenson' },
-  { id: 'EC-016', name: 'Ayebare Sperio Ssalongo' }
+  { id: 'EC-016', name: 'Ayebare Sperio Ssalongo' },
+  { id: 'EC-017', name: 'Arinda Olivia' },
+  { id: 'EC-018', name: 'Joy Ninshaba' }
 ].map((member) => ({
   ...member,
   membershipNumber: member.id,
@@ -59,7 +61,9 @@ router.get('/', async (req, res) => {
 
 router.post('/register', async (req, res) => {
   try {
-    const existing = await Member.findOne({ email: req.body.email }).catch(() => null)
+    const existing = isDbConnected()
+      ? await Member.findOne({ email: req.body.email }).catch(() => null)
+      : null
     if (existing) {
       Object.assign(existing, req.body)
       try {
@@ -71,6 +75,9 @@ router.post('/register', async (req, res) => {
     }
 
     const member = new Member(req.body)
+    if (!isDbConnected()) {
+      return res.status(201).json(upsertMember({ ...req.body, _id: req.body.id || Date.now().toString() }))
+    }
     try {
       await member.save()
     } catch (err) {
@@ -84,7 +91,9 @@ router.post('/register', async (req, res) => {
 
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const existing = await Member.findOne({ email: req.body.email }).catch(() => null)
+    const existing = isDbConnected()
+      ? await Member.findOne({ email: req.body.email }).catch(() => null)
+      : null
     if (existing) {
       Object.assign(existing, req.body)
       try {
@@ -96,6 +105,9 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 
     const member = new Member(req.body)
+    if (!isDbConnected()) {
+      return res.status(201).json(upsertMember({ ...req.body, _id: req.body.id || Date.now().toString() }))
+    }
     try {
       await member.save()
     } catch (err) {

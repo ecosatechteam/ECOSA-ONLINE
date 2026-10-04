@@ -43,15 +43,15 @@ This repository contains two major parts:
 ### User experience
 
 1. The home page lets visitors explore ECOSA services and navigate to registration, payments, community, members, projects, leadership, chapters, and resources.
-2. Users can register as alumni, search members, and view member details.
-3. The payments page accepts mobile or card details and records payments locally or via the backend when available.
+2. Users can register as alumni, choose a country calling code and gender, search members, and view member details.
+3. The payments page creates Flutterwave hosted checkout sessions for Uganda mobile money or cards. Membership is confirmed only after server-side transaction verification.
 4. Community posts, job listings, leaders, resources, and project data are served through the shared `mockService.ts` layer.
 
 ### Backend integration
 
 - The frontend service wrapper in `frontend/src/services/mockService.ts` is configured to call `import.meta.env.VITE_API_BASE || 'http://localhost:4000/api'`.
 - If a local backend is available, API requests are sent to that server.
-- If the backend is unavailable, the app gracefully falls back to browser `localStorage` and continues operating as a self-contained demo.
+- If the backend is unavailable, non-payment demo data may fall back to browser `localStorage`. Payment checkout fails explicitly and is never recorded as successful without provider confirmation.
 
 ### SPA behavior
 
@@ -82,6 +82,9 @@ The backend already reads its MongoDB connection string from `backend/.env` thro
 MONGODB_URI=mongodb+srv://tuancreationsafrica_db_user:<db_password>@cluster0.xhk6biz.mongodb.net/tuan_creations?appName=Cluster0
 PORT=4000
 JWT_SECRET=replace-with-a-long-secret
+FLUTTERWAVE_SECRET_KEY=replace-with-flutterwave-secret-key
+FLUTTERWAVE_WEBHOOK_SECRET=replace-with-flutterwave-webhook-secret-hash
+FLUTTERWAVE_REDIRECT_URL=http://localhost:5173/payments
 ```
 
 If Atlas is reachable, the backend connects to it on startup. If the connection fails, the server logs a warning and continues in fallback mode.
@@ -126,6 +129,15 @@ The repository includes `netlify.toml` for Netlify static hosting.
 - Build command: `npm run build`
 - Publish directory: `dist`
 - Redirects: `public/_redirects`
+
+### Production services
+
+- Deploy the Express backend separately and set `VITE_API_BASE` in the frontend deployment to the backend API URL ending in `/api`.
+- Configure `MONGODB_URI` and a strong `JWT_SECRET` on the backend. The in-memory fallback is temporary and loses data when the backend restarts; it is not suitable for production persistence.
+- Configure `FLUTTERWAVE_SECRET_KEY`, `FLUTTERWAVE_WEBHOOK_SECRET`, and `FLUTTERWAVE_REDIRECT_URL` on the backend before accepting payments. Use the Flutterwave secret key and the exact webhook secret hash configured in the Flutterwave dashboard; never put either secret in the frontend.
+- Set the Flutterwave webhook URL to `https://your-backend.example/api/payments/webhook` and enable `charge.completed` notifications. The backend checks Flutterwave's `verif-hash` header and verifies transaction reference, amount, currency, and final status with Flutterwave before confirming membership.
+- Set the redirect URL to the public frontend payments page (for example, `https://your-site.example/payments`). Flutterwave account settings must allow UGX card and Uganda mobile-money payment methods; disable the dashboard payment-options override so the per-checkout method selection is applied.
+- Keep MongoDB configured in production. The in-memory fallback is temporary and loses pending payments when the backend restarts, so it is unsuitable for real transactions.
 
 ## Notes
 

@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 const router = express.Router()
 const Admin = require('../models/Admin')
-const { addAdmin, findAdminByEmail } = require('../utils/store')
+const { addAdmin, findAdminByEmail, isDbConnected } = require('../utils/store')
 const { sendEmail } = require('../utils/notifications')
 
 const JWT_SECRET = process.env.JWT_SECRET || 'ecosa-dev-secret'
@@ -20,7 +20,7 @@ function isAllowedEmail(email) {
 }
 
 async function findAdmin() {
-  if (process.env.SKIP_MONGO === 'true') return findAdminByEmail(ADMIN_EMAIL)
+  if (!isDbConnected()) return findAdminByEmail(ADMIN_EMAIL)
   const admin = await Admin.findOne({ email: ADMIN_EMAIL }).catch(() => null)
   return admin || findAdminByEmail(ADMIN_EMAIL)
 }
@@ -31,7 +31,7 @@ async function ensureAdmin(password) {
 
   const passwordHash = await bcrypt.hash(password, 10)
   const admin = new Admin({ name: 'ECOSA Administrator', email: ADMIN_EMAIL, passwordHash, role: 'admin' })
-  if (process.env.SKIP_MONGO === 'true') {
+  if (!isDbConnected()) {
     return addAdmin({ id: ADMIN_EMAIL, name: 'ECOSA Administrator', email: ADMIN_EMAIL, passwordHash, role: 'admin' })
   }
   try {
@@ -106,10 +106,16 @@ router.post('/reset-password', async (req, res) => {
   }
 
   const passwordHash = await bcrypt.hash(password, 10)
-  const admin = process.env.SKIP_MONGO === 'true' ? null : await Admin.findOne({ email: ADMIN_EMAIL }).catch(() => null)
+  const admin = isDbConnected() ? await Admin.findOne({ email: ADMIN_EMAIL }).catch(() => null) : null
   if (admin) {
     admin.passwordHash = passwordHash
-    await admin.save().catch(() => {})
+    try {
+      await admin.save()
+    } catch (err) {
+      const memoryAdmin = findAdminByEmail(ADMIN_EMAIL)
+      if (memoryAdmin) memoryAdmin.passwordHash = passwordHash
+      else addAdmin({ id: ADMIN_EMAIL, name: 'ECOSA Administrator', email: ADMIN_EMAIL, passwordHash, role: 'admin' })
+    }
   } else {
     const memoryAdmin = findAdminByEmail(ADMIN_EMAIL)
     if (memoryAdmin) memoryAdmin.passwordHash = passwordHash

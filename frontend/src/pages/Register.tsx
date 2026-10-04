@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { isValidPhoneNumber } from 'react-phone-number-input'
 import { registerMember } from '../services/mockService'
+import PhoneNumberInput from '../components/PhoneNumberInput'
 
 const START_YEAR = 2002
 const CURRENT_YEAR = new Date().getFullYear()
@@ -25,6 +27,7 @@ export default function Register() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [gender, setGender] = useState('')
   const [yearFrom, setYearFrom] = useState('')
   const [yearTo, setYearTo] = useState('')
   const [profession, setProfession] = useState('')
@@ -41,6 +44,9 @@ export default function Register() {
     if (!name || !email || !chapter) {
       return alert('Please provide your name, email and chapter.')
     }
+    if (phone && !isValidPhoneNumber(phone)) {
+      return alert('Choose a country code and enter a valid phone number.')
+    }
 
     const yearsAtECI =
       yearFrom && yearTo
@@ -52,6 +58,7 @@ export default function Register() {
         name,
         email,
         phone,
+        gender,
         chapter,
         yearsAtECI,
         employment: profession,
@@ -105,11 +112,26 @@ export default function Register() {
           required
         />
 
-        <label>Phone</label>
-        <input
+        <label htmlFor="registration-phone">Phone (select country code first)</label>
+        <PhoneNumberInput
+          id="registration-phone"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={setPhone}
         />
+
+        <label htmlFor="registration-gender">Gender</label>
+        <select
+          id="registration-gender"
+          value={gender}
+          onChange={(e) => setGender(e.target.value)}
+          required
+        >
+          <option value="">Select gender</option>
+          <option value="Female">Female</option>
+          <option value="Male">Male</option>
+          <option value="Other">Other</option>
+          <option value="Prefer not to say">Prefer not to say</option>
+        </select>
 
         <label>Years at ECI</label>
 

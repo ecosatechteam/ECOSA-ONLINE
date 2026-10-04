@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const Post = require('../models/Post')
-const { addPost: addToStore, listPosts, isDbConnected } = require('../utils/store')
+const { addPost: addToStore, listPosts, isDbConnected, upsertPost, removePost } = require('../utils/store')
 const authMiddleware = require('../middleware/auth')
 
 function seedPosts() {
@@ -40,6 +40,11 @@ router.get('/', async (req, res) => {
 
 router.post('/', authMiddleware, async (req, res) => {
   try {
+    if (!isDbConnected()) {
+      const post = { ...req.body, id: req.body.id || `post_${Date.now()}`, createdAt: req.body.createdAt || new Date().toISOString() }
+      upsertPost(post)
+      return res.status(201).json(post)
+    }
     const post = new Post(req.body)
     try {
       await post.save()
@@ -54,6 +59,12 @@ router.post('/', authMiddleware, async (req, res) => {
 
 router.put('/:id', authMiddleware, async (req, res) => {
   try {
+    if (!isDbConnected()) {
+      const existing = listPosts().find((item) => String(item.id || item._id) === String(req.params.id))
+      if (!existing) return res.status(404).json({ message: 'Post not found' })
+      const post = upsertPost({ ...existing, ...req.body, id: req.params.id })
+      return res.json(post)
+    }
     const post = await Post.findByIdAndUpdate(req.params.id, req.body, { new: true })
     res.json(post)
   } catch (err) {
@@ -63,6 +74,10 @@ router.put('/:id', authMiddleware, async (req, res) => {
 
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
+    if (!isDbConnected()) {
+      removePost(req.params.id)
+      return res.json({ ok: true })
+    }
     await Post.findByIdAndDelete(req.params.id)
     res.json({ ok: true })
   } catch (err) {

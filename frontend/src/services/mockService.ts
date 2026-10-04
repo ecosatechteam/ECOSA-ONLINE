@@ -3,6 +3,7 @@ export type Member = {
   name: string
   email: string
   phone?: string
+  gender?: string
   universities?: string[]
   employment?: string
   business?: string
@@ -49,8 +50,9 @@ async function api(path: string, opts?: any) {
     const token = localStorage.getItem(ADMIN_TOKEN_KEY)
     if (token) headers.set('Authorization', `Bearer ${token}`)
     const res = await fetch(base + path, { ...opts, headers })
-    if (res.ok) return res.json()
-    const error = new Error('API error') as Error & { status?: number }
+    const result = await res.json().catch(() => null)
+    if (res.ok) return result
+    const error = new Error(result?.message || 'API error') as Error & { status?: number }
     error.status = res.status
     throw error
   } catch (e) {
@@ -453,35 +455,37 @@ export async function login(email: string) {
 }
 
 // Payments
-export async function addPayment(payment: any) {
-  try {
-    const payload = {
+export async function createPaymentCheckout(payment: {
+  memberName: string
+  email: string
+  phone: string
+  purpose: string
+  amount: number
+  method: 'mobile' | 'card'
+}) {
+  return api('/payments/checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
       member: {
-        name: payment.memberName || payment.name || '',
-        email: payment.email || '',
-        phone: payment.phone || '',
+        name: payment.memberName,
+        email: payment.email,
+        phone: payment.phone,
       },
       payment: {
-        purpose: payment.purpose || 'Membership',
-        amount: Number(payment.amount || 0),
-        currency: payment.currency || 'UGX',
-        method: payment.method || 'mpesa',
-        phone: payment.phone || ''
-      }
-    }
+        purpose: payment.purpose,
+        amount: payment.amount,
+        currency: 'UGX',
+        method: payment.method,
+        phone: payment.phone,
+      },
+    }),
+  })
+}
 
-    const res = await api('/payments/initiate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-    return res
-  } catch {
-    const list = read('ecosa_payments')
-    list.push(payment)
-    write('ecosa_payments', list)
-    return payment
-  }
+export async function verifyPayment(transactionId: string, txRef: string) {
+  const query = new URLSearchParams({ transaction_id: transactionId, tx_ref: txRef })
+  return api(`/payments/verify?${query.toString()}`)
 }
 export async function getPayments() {
   try {
@@ -617,7 +621,9 @@ export async function voteLeader(leaderId: string, voterEmail: string) {
       { id: 'EC-013', name: 'Africano' },
       { id: 'EC-014', name: 'Dorothy Asiimwe' },
       { id: 'EC-015', name: 'Ndeeba Stephenson' },
-      { id: 'EC-016', name: 'Ayebare Sperio Ssalongo' }
+      { id: 'EC-016', name: 'Ayebare Sperio Ssalongo' },
+      { id: 'EC-017', name: 'Arinda Olivia' },
+      { id: 'EC-018', name: 'Joy Ninshaba' }
     ].map(m => ({
       ...m,
       membershipNumber: m.id,

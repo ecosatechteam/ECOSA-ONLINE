@@ -1739,6 +1739,25 @@ select:focus {
     color: #102a43;
   }
 
+  .dashboard-form .phone-number-input {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .dashboard-form .phone-number-input .PhoneInputInput {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .dashboard-form .phone-number-input .PhoneInputCountry {
+    margin: 0;
+    padding: 0 12px;
+    border: 1px solid #d8e0ec;
+    border-radius: 12px;
+    background: #fcfdff;
+  }
+
   .dashboard-form input::placeholder,
   .dashboard-form textarea::placeholder {
     color: #8292a6;

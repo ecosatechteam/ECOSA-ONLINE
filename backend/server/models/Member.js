@@ -4,6 +4,7 @@ const memberSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
   phone: { type: String, default: '' },
+  gender: { type: String, default: '' },
   chapter: { type: String, default: '' },
   yearsAtECI: { type: String, default: '' },
   employment: { type: String, default: '' },
@@ -12,6 +13,7 @@ const memberSchema = new mongoose.Schema({
   businessDescription: { type: String, default: '' },
   membershipNumber: { type: String, default: '' },
   paymentStatus: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' },
+  confirmedAt: { type: Date },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 })

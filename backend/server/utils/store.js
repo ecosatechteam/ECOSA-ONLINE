@@ -47,7 +47,11 @@ function listMembers() {
 }
 
 function upsertPayment(payment) {
-  const existingIndex = state.payments.findIndex((item) => item._id === payment._id || item.id === payment.id)
+  const paymentId = payment._id || payment.id
+  const existingIndex = state.payments.findIndex((item) => (
+    (paymentId && String(item._id || item.id) === String(paymentId))
+    || (payment.txRef && item.txRef === payment.txRef)
+  ))
   if (existingIndex >= 0) {
     state.payments[existingIndex] = { ...state.payments[existingIndex], ...payment }
     return state.payments[existingIndex]
@@ -67,6 +71,21 @@ function addPost(post) {
 
 function listPosts() {
   return state.posts
+}
+
+function upsertPost(post) {
+  const postId = post.id || post._id
+  const existingIndex = state.posts.findIndex((item) => (item.id || item._id) === postId)
+  if (existingIndex >= 0) {
+    state.posts[existingIndex] = { ...state.posts[existingIndex], ...post }
+    return state.posts[existingIndex]
+  }
+  state.posts.unshift(post)
+  return post
+}
+
+function removePost(postId) {
+  state.posts = state.posts.filter((item) => String(item.id || item._id) !== String(postId))
 }
 
 function upsertResource(resource) {
@@ -153,6 +172,8 @@ module.exports = {
   listPayments,
   addPost,
   listPosts,
+  upsertPost,
+  removePost,
   upsertResource,
   listResources,
   removeResource,

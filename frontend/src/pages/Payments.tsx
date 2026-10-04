@@ -1,6 +1,8 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { addPayment } from '../services/mockService'
+import { isValidPhoneNumber } from 'react-phone-number-input'
+import { createPaymentCheckout, verifyPayment } from '../services/mockService'
+import PhoneNumberInput from '../components/PhoneNumberInput'
 
 const purposeOptions = ['Alumni Dues', 'Insurance', 'Sacco', 'Project Donation', 'Event Ticket'] as const
 type Purpose = typeof purposeOptions[number]
@@ -18,50 +20,75 @@ export default function Payments(){
   const [amount,setAmount]=useState(initialAmount)
   const [purpose,setPurpose]=useState<Purpose>(initialPurpose)
   const [method,setMethod]=useState<'mobile'|'card'>('mobile')
+  const [submitting,setSubmitting]=useState(false)
+  const [paymentMessage,setPaymentMessage]=useState('')
+  const [paymentError,setPaymentError]=useState('')
+  const [paymentConfirmed,setPaymentConfirmed]=useState(false)
+
+  useEffect(() => {
+    const status = searchParams.get('status')
+    const transactionId = searchParams.get('transaction_id')
+    const txRef = searchParams.get('tx_ref')
+    if (!status) return
+    if (status !== 'successful' || !transactionId || !txRef) {
+      setPaymentMessage('Payment was not completed. You can try again below.')
+      return
+    }
+
+    let active = true
+    setPaymentMessage('Verifying your payment securely...')
+    verifyPayment(transactionId, txRef)
+      .then((result: { status: string }) => {
+        if (active) {
+          setPaymentConfirmed(result.status === 'paid')
+          setPaymentMessage(result.status === 'paid'
+            ? 'Payment confirmed. Your alumni membership will be updated shortly.'
+            : 'Payment is still processing. Your membership will update after confirmation.')
+        }
+      })
+      .catch((error: Error) => {
+        if (active) {
+          setPaymentMessage('')
+          setPaymentError(error.message || 'We could not verify the payment yet. Please contact ECOSA before paying again.')
+        }
+      })
+    return () => { active = false }
+  }, [searchParams])
 
   const submit = async (e:React.FormEvent)=>{
     e.preventDefault()
-    if(!name||!email||!amount) return alert('Provide name, email and amount')
-    if(method==='mobile' && !phone) return alert('Enter phone number')
-
-    const payment = {
-      memberName: name,
-      email,
-      phone,
-      purpose,
-      amount: Number(amount),
-      currency: 'UGX',
-      method,
-      status: 'pending',
+    setPaymentError('')
+    if(!name.trim() || !email.trim() || !amount) {
+      setPaymentError('Provide your name, email, and amount.')
+      return
+    }
+    if(!Number.isSafeInteger(Number(amount)) || Number(amount) <= 0) {
+      setPaymentError('Enter a whole-number amount greater than zero.')
+      return
+    }
+    if(method==='mobile' && (!phone.trim() || !isValidPhoneNumber(phone))) {
+      setPaymentError('Choose a country code and enter a valid phone number for mobile money.')
+      return
     }
 
-    await addPayment(payment)
-
-    if(method === 'card'){
-      try {
-        const base = import.meta.env.VITE_API_BASE || 'http://localhost:4000'
-        const res = await fetch(`${base}/api/create-checkout-session`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: Math.round(Number(amount)), currency: 'ugx' }),
-        })
-        const data = await res.json()
-        if (data?.url) {
-          window.location.href = data.url
-          return
-        }
-      } catch (err) {
-        console.warn('Card checkout initiation failed', err)
+    setSubmitting(true)
+    try {
+      const result = await createPaymentCheckout({
+        memberName: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        purpose,
+        amount: Number(amount),
+        method,
+      })
+      if (typeof result?.checkoutUrl !== 'string') {
+        throw new Error('The payment provider did not return a checkout link.')
       }
+      window.location.assign(result.checkoutUrl)
+    } catch (error) {
+      setPaymentError(error instanceof Error ? error.message : 'Could not start checkout. Please try again.')
+      setSubmitting(false)
     }
-
-    alert(method === 'mobile'
-      ? 'Mobile money initiated. Please complete payment on your phone. Your alumni record will be confirmed after payment success.'
-      : 'Card payment initiated. Please complete the checkout. Your alumni record will be confirmed after payment success.')
-
-    setAmount('20000')
-    setPhone('')
-    setYears('')
   }
 
   return (
@@ -81,13 +108,13 @@ export default function Payments(){
       </section>
 
       <div className="card">
-        <form onSubmit={submit} className="dashboard-form">
+        {paymentMessage && <p role="status" className="muted">{paymentMessage}</p>}
+        {paymentError && <p role="alert" style={{ color: '#b42318' }}>{paymentError}</p>}
+        {!paymentConfirmed && <form onSubmit={submit} className="dashboard-form">
           <label>Name</label>
-          <input value={name} onChange={e=>setName(e.target.value)} />
+          <input value={name} onChange={e=>setName(e.target.value)} autoComplete="name" required />
           <label>Email</label>
-          <input value={email} onChange={e=>setEmail(e.target.value)} />
-          <label>Phone</label>
-          <input value={phone} onChange={e=>setPhone(e.target.value)} />
+          <input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email" required />
           <label>Years at ECI</label>
           <input value={years} onChange={e=>setYears(e.target.value)} placeholder="e.g. 2008-2012" />
           <label>Payment purpose</label>
@@ -99,7 +126,7 @@ export default function Payments(){
             <option value="Event Ticket">Event Ticket</option>
           </select>
           <label>Amount (UGX)</label>
-          <input value={amount} onChange={e=>setAmount(e.target.value)} placeholder="20000" />
+          <input type="number" min="1" step="1" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="20000" required />
 
           <label style={{marginTop:8}}>Select payment method</label>
           <div className="payment-options">
@@ -111,15 +138,11 @@ export default function Payments(){
             </button>
           </div>
 
-          {method==='mobile' && (
-            <div>
-              <label>Phone (international format, e.g. 2567xxxxxxx)</label>
-              <input value={phone} onChange={e=>setPhone(e.target.value)} />
-            </div>
-          )}
+          <label htmlFor="payment-phone">Phone {method === 'mobile' ? '(select country code first)' : '(optional)'}</label>
+          <PhoneNumberInput id="payment-phone" value={phone} onChange={setPhone} required={method === 'mobile'} />
 
-          <div className="actions"><button className="btn">{method==='card' ? 'Pay with Card' : `Pay with ${method.toUpperCase()}`}</button></div>
-        </form>
+          <div className="actions"><button className="btn" disabled={submitting}>{submitting ? 'Connecting to Flutterwave...' : method==='card' ? 'Pay with Card' : 'Pay with Mobile Money'}</button></div>
+        </form>}
         <p style={{color:'#6b7280',marginTop:12}}>Payments will record your alumni details and update the alumni directory automatically.</p>
       </div>
     </div>
