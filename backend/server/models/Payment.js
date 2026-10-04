@@ -8,6 +8,7 @@ const paymentSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   currency: { type: String, default: 'UGX' },
   method: { type: String, default: 'mpesa' },
+  recordedBy: { type: String, default: '' },
   phone: { type: String, default: '' },
   txRef: { type: String, unique: true, sparse: true },
   status: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' },

@@ -46,7 +46,7 @@ This repository contains two major parts:
 2. Users can register as alumni, choose a country calling code and gender, search members, and view member details.
 3. The payments page creates Flutterwave hosted checkout sessions for Uganda mobile money or cards. Membership is confirmed only after server-side transaction verification.
 4. Community posts, job listings, leaders, resources, and project data are served through the shared `mockService.ts` layer.
-5. Admins can review and update all member records from the dashboard, open titled member details with per-member payment history, and manage payment records. Full member records and payment-history API responses require admin authentication.
+5. Admins can review and update all member records from the dashboard, record payments received outside the website, inspect confirmed payment details, and manage the homepage hero slideshow. Built-in and uploaded hero photos are shown together and rotate automatically; built-in photos can be hidden and restored, and uploaded photos can be removed. Full member records, payment history, manual payment recording, and hero-photo changes require admin authentication. Uploaded hero photos and slideshow settings are stored in MongoDB when connected; without MongoDB, the API uses in-memory fallback storage.
 
 ### Backend integration
 

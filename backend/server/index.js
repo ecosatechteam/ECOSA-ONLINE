@@ -12,6 +12,7 @@ const resourcesRoute = require('./routes/resources')
 const chaptersRoute = require('./routes/chapters')
 const leadersRoute = require('./routes/leaders')
 const projectsRoute = require('./routes/projects')
+const heroSlidesRoute = require('./routes/heroSlides')
 const authMiddleware = require('./middleware/auth')
 
 const app = express()
@@ -33,6 +34,7 @@ app.use('/api/resources', resourcesRoute)
 app.use('/api/chapters', chaptersRoute)
 app.use('/api/leaders', leadersRoute)
 app.use('/api/projects', projectsRoute)
+app.use('/api/hero-slides', heroSlidesRoute)
 
 app.get('/api/admin/dashboard', authMiddleware, async (req, res) => {
   res.json({ ok: true, user: req.user })

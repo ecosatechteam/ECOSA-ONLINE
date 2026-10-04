@@ -1613,6 +1613,43 @@ select:focus {
     overflow-wrap: anywhere;
   }
 
+  .dashboard-payment-review-item {
+    flex-wrap: wrap;
+  }
+
+  .dashboard-payment-review-item > .dashboard-member-details {
+    flex: 1 1 100%;
+  }
+
+  .dashboard-hero-slide-item {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .dashboard-hero-slide-item img {
+    width: 112px;
+    height: 72px;
+    flex: 0 0 auto;
+    object-fit: cover;
+    border-radius: 10px;
+    background: #e8edf6;
+  }
+
+  .dashboard-manual-payment-form {
+    margin-bottom: 18px;
+    padding: 16px;
+    border: 1px solid #e1e9f5;
+    border-radius: 14px;
+    background: #f9fbff;
+  }
+
+  .dashboard-manual-payment-form h4,
+  .dashboard-manual-payment-form p {
+    margin: 0;
+  }
+
   .dashboard-form {
     display: grid;
     gap: 12px;

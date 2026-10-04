@@ -28,6 +28,20 @@ export type Chapter = {
   status?: string
 }
 
+export type HeroSlide = {
+  id: string
+  name?: string
+  imageUrl: string
+  uploadedAt?: string
+  source?: 'builtin' | 'upload'
+  active?: boolean
+}
+
+export type HeroSlideState = {
+  slides: HeroSlide[]
+  managed: boolean
+}
+
 const SESS_KEY = 'ecosa_session'
 const ADMIN_TOKEN_KEY = 'ecosa_admin_token'
 const CHAPTERS_KEY = 'ecosa_chapters'
@@ -452,6 +466,21 @@ export async function confirmPayment(paymentId: string, reference?: string) {
   }
 }
 
+export async function recordManualPayment(payment: {
+  memberEmail: string
+  amount: number
+  purpose: string
+  method: string
+  reference?: string
+  paidAt: string
+}) {
+  return api('/payments/manual', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payment),
+  })
+}
+
 export async function registerMember(m: any) {
   if (!m.id) m.id = Date.now().toString()
   if (!m.membershipNumber) m.membershipNumber = `EC-${Date.now()}`
@@ -524,6 +553,128 @@ export async function getPayments() {
   } catch (error) {
     if (typeof error === 'object' && error !== null && 'status' in error) throw error
     return read('ecosa_payments')
+  }
+}
+
+function resolveHeroSlide(slide: any): HeroSlide {
+  const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:4000/api'
+  const apiOrigin = new URL(apiBase, window.location.origin).origin
+  const url = slide.imageUrl || slide.url
+  if (!url) throw new Error('Hero photo has no image URL')
+  return {
+    id: String(slide.id || slide._id),
+    name: slide.name || '',
+    imageUrl: url.startsWith('data:') ? url : new URL(url, slide.source === 'builtin' ? window.location.origin : apiOrigin).href,
+    uploadedAt: slide.uploadedAt,
+    source: slide.source || (slide.id?.startsWith('builtin-') ? 'builtin' : 'upload'),
+    active: slide.active !== false,
+  }
+}
+
+function readLocalHeroSlides(): HeroSlideState {
+  const slides: HeroSlide[] = read('ecosa_hero_slides').map((slide: any) => resolveHeroSlide(slide))
+  return { slides: slides.filter((slide) => slide.active), managed: slides.length > 0 }
+}
+
+export async function getHeroSlides(includeInactive = false): Promise<HeroSlideState> {
+  const query = includeInactive ? '?includeInactive=true' : ''
+  try {
+    const result = await api(`/hero-slides${query}`)
+    if (!Array.isArray(result?.slides) || typeof result.managed !== 'boolean') throw new Error('Invalid hero photo response')
+    return { slides: result.slides.map((slide: any) => resolveHeroSlide(slide)), managed: result.managed }
+  } catch (error) {
+    if (includeInactive && typeof error === 'object' && error !== null && 'status' in error) throw error
+    console.error('Failed to fetch homepage hero photos; using local fallback:', error)
+    return readLocalHeroSlides()
+  }
+}
+
+export async function syncBuiltInHeroSlides(slides: Array<Pick<HeroSlide, 'id' | 'name' | 'imageUrl' | 'source'>>) {
+  const defaults = slides.map((slide) => ({
+    id: slide.id,
+    name: slide.name,
+    url: slide.imageUrl,
+  }))
+  try {
+    await api('/hero-slides/defaults', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slides: defaults }),
+    })
+  } catch (error) {
+    if (typeof error === 'object' && error !== null && 'status' in error) throw error
+    const localSlides = read('ecosa_hero_slides')
+    for (const slide of slides) {
+      const existing = localSlides.find((item: any) => item.id === slide.id)
+      if (existing) Object.assign(existing, slide)
+      else localSlides.unshift({ ...slide, active: true })
+    }
+    write('ecosa_hero_slides', localSlides)
+  }
+}
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result || ''))
+    reader.onerror = () => reject(new Error('Unable to read photo'))
+    reader.readAsDataURL(file)
+  })
+}
+
+export async function addHeroSlide(file: File): Promise<HeroSlide> {
+  try {
+    const slide = await api('/hero-slides', {
+      method: 'POST',
+      headers: { 'Content-Type': file.type, 'X-File-Name': encodeURIComponent(file.name) },
+      body: file,
+    })
+    return resolveHeroSlide(slide)
+  } catch (error) {
+    if (typeof error === 'object' && error !== null && 'status' in error) throw error
+    const slides = read('ecosa_hero_slides')
+    const slide = {
+      id: `slide_${Date.now()}`,
+      name: file.name,
+      imageUrl: await readFileAsDataUrl(file),
+      uploadedAt: new Date().toISOString(),
+      source: 'upload' as const,
+      active: true,
+    }
+    slides.push(slide)
+    write('ecosa_hero_slides', slides)
+    return slide
+  }
+}
+
+export async function deleteHeroSlide(slideId: string) {
+  try {
+    return await api(`/hero-slides/${encodeURIComponent(slideId)}`, { method: 'DELETE' })
+  } catch (error) {
+    if (typeof error === 'object' && error !== null && 'status' in error) throw error
+    const localSlides = read('ecosa_hero_slides')
+    write('ecosa_hero_slides', localSlides
+      .map((slide: any) => slide.id === slideId && slide.source === 'builtin' ? { ...slide, active: false } : slide)
+      .filter((slide: any) => slide.id !== slideId || slide.source === 'builtin'))
+    return { ok: true }
+  }
+}
+
+export async function updateHeroSlide(slideId: string, active: boolean) {
+  try {
+    return await api(`/hero-slides/${encodeURIComponent(slideId)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active }),
+    })
+  } catch (error) {
+    if (typeof error === 'object' && error !== null && 'status' in error) throw error
+    const slides = read('ecosa_hero_slides')
+    const slide = slides.find((item: any) => item.id === slideId && item.source === 'builtin')
+    if (!slide) throw new Error('Built-in hero photo not found in local storage')
+    slide.active = active
+    write('ecosa_hero_slides', slides)
+    return slide
   }
 }
 

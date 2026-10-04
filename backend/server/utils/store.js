@@ -6,6 +6,7 @@ const state = {
   posts: [],
   admins: [],
   resources: [],
+  heroSlides: [],
   chapters: [],
   leaders: [],
   projects: []
@@ -110,6 +111,24 @@ function removeResource(resourceId) {
   state.resources = state.resources.filter((item) => item.id !== resourceId)
 }
 
+function upsertHeroSlide(slide) {
+  const existingIndex = state.heroSlides.findIndex((item) => item.id === slide.id)
+  if (existingIndex >= 0) {
+    state.heroSlides[existingIndex] = { ...state.heroSlides[existingIndex], ...slide }
+    return state.heroSlides[existingIndex]
+  }
+  state.heroSlides.push(slide)
+  return slide
+}
+
+function listHeroSlides() {
+  return state.heroSlides
+}
+
+function removeHeroSlide(slideId) {
+  state.heroSlides = state.heroSlides.filter((item) => item.id !== slideId)
+}
+
 function upsertChapter(chapter) {
   const existingIndex = state.chapters.findIndex((item) => item.id === chapter.id)
   if (existingIndex >= 0) {
@@ -181,6 +200,9 @@ module.exports = {
   upsertResource,
   listResources,
   removeResource,
+  upsertHeroSlide,
+  listHeroSlides,
+  removeHeroSlide,
   upsertChapter,
   listChapters,
   removeChapter,

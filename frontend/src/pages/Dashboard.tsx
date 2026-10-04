@@ -5,8 +5,10 @@ import PhoneNumberInput from '../components/PhoneNumberInput'
 import {
   addPost,
   addResource,
+  addHeroSlide,
   confirmPayment,
   deleteChapter,
+  deleteHeroSlide,
   deleteLeader,
   deletePost,
   deleteProject,
@@ -15,6 +17,7 @@ import {
   getChapters,
   getLeaders,
   getPayments,
+  getHeroSlides,
   getPosts,
   getProjects,
   getResources,
@@ -24,12 +27,20 @@ import {
   saveLeader,
   saveProject,
   adminLogout,
+  recordManualPayment,
+  syncBuiltInHeroSlides,
+  updateHeroSlide,
 } from '../services/mockService'
+import { builtInHeroSlides } from '../utils/heroSlides'
 
 function formatDate(value?: string) {
   if (!value) return 'Unknown'
   const date = new Date(value)
   return isNaN(date.getTime()) ? 'Unknown' : date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+function isPaymentConfirmed(payment: any) {
+  return String(payment.status || '').toLowerCase() === 'paid' || payment.paid === true
 }
 
 const START_YEAR = 2002
@@ -83,7 +94,21 @@ export default function Dashboard() {
   const [chapters, setChapters] = useState<any[]>([])
   const [leaders, setLeaders] = useState<any[]>([])
   const [projects, setProjects] = useState<any[]>([])
-  const [activePanel, setActivePanel] = useState<'members' | 'payments' | 'chapters' | 'leaders' | 'projects' | 'resources' | 'updates' | null>(null)
+  const [heroSlides, setHeroSlides] = useState<any[]>([])
+  const [heroSlideFile, setHeroSlideFile] = useState<File | null>(null)
+  const [uploadingHeroSlide, setUploadingHeroSlide] = useState(false)
+  const [removingHeroSlideId, setRemovingHeroSlideId] = useState('')
+  const [reviewingPaymentId, setReviewingPaymentId] = useState('')
+  const [recordingPayment, setRecordingPayment] = useState(false)
+  const [manualPayment, setManualPayment] = useState({
+    memberEmail: '',
+    amount: '20000',
+    purpose: 'Alumni Dues',
+    method: 'cash',
+    reference: '',
+    paidAt: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10),
+  })
+  const [activePanel, setActivePanel] = useState<'members' | 'payments' | 'chapters' | 'leaders' | 'projects' | 'resources' | 'updates' | 'hero-slides' | null>(null)
   const [memberFilter, setMemberFilter] = useState<'all' | 'pending' | 'paid'>('all')
   const [showMemberForm, setShowMemberForm] = useState(false)
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'pending' | 'paid'>('pending')
@@ -134,12 +159,14 @@ export default function Dashboard() {
   const [memberEditForm, setMemberEditForm] = useState<MemberFormValues>(createEmptyMemberForm)
 
   async function loadData() {
-    const [memberData, paymentData, postData, resourceData, chapterData] = await Promise.all([
+    await syncBuiltInHeroSlides(builtInHeroSlides)
+    const [memberData, paymentData, postData, resourceData, chapterData, heroSlideState] = await Promise.all([
       getAllMembers(),
       getPayments(),
       getPosts(),
       getResources(),
       getChapters(),
+      getHeroSlides(true),
     ])
     const [leaderData, projectData] = await Promise.all([
       getLeaders(),
@@ -153,6 +180,7 @@ export default function Dashboard() {
     setChapters(chapterData || [])
     setLeaders(leaderData || [])
     setProjects(projectData || [])
+    setHeroSlides(heroSlideState.slides || [])
   }
 
   useEffect(() => {
@@ -168,7 +196,7 @@ export default function Dashboard() {
   const pendingMembers = members.filter((member) => (member.paymentStatus || '').toLowerCase() !== 'paid')
   const paidMembers = members.filter((member) => (member.paymentStatus || '').toLowerCase() === 'paid')
   const visibleMembers = memberFilter === 'pending' ? pendingMembers : memberFilter === 'paid' ? paidMembers : members
-  const visiblePayments = paymentFilter === 'pending' ? payments.filter((payment) => (payment.status || 'pending') !== 'paid') : paymentFilter === 'paid' ? payments.filter((payment) => (payment.status || '') === 'paid') : payments
+  const visiblePayments = paymentFilter === 'pending' ? payments.filter((payment) => !isPaymentConfirmed(payment)) : paymentFilter === 'paid' ? payments.filter(isPaymentConfirmed) : payments
   const headlinePlaceholder =
     updateType === 'event'
       ? 'ECOSA Annual General Meeting'
@@ -250,6 +278,44 @@ export default function Dashboard() {
       await loadData()
     } finally {
       setBusyPaymentId('')
+    }
+  }
+
+  const handleRecordManualPayment = async (event: React.FormEvent) => {
+    event.preventDefault()
+    const member = members.find((item) => String(item.email || '').toLowerCase() === manualPayment.memberEmail.toLowerCase())
+    const amount = Number(manualPayment.amount)
+    if (!member) {
+      alert('Select a member before recording the payment')
+      return
+    }
+    if (!Number.isSafeInteger(amount) || amount <= 0) {
+      alert('Enter a valid whole-number amount')
+      return
+    }
+    setRecordingPayment(true)
+    try {
+      await recordManualPayment({
+        memberEmail: member.email,
+        amount,
+        purpose: manualPayment.purpose,
+        method: manualPayment.method,
+        reference: manualPayment.reference.trim(),
+        paidAt: manualPayment.paidAt,
+      })
+      setManualPayment((current) => ({
+        ...current,
+        memberEmail: '',
+        amount: '20000',
+        reference: '',
+        paidAt: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10),
+      }))
+      await loadData()
+      alert('Member payment recorded')
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Unable to record the payment')
+    } finally {
+      setRecordingPayment(false)
     }
   }
 
@@ -569,6 +635,55 @@ export default function Dashboard() {
     await loadData()
   }
 
+  const handleHeroSlideSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!heroSlideFile) {
+      alert('Choose a photo to add to the homepage hero')
+      return
+    }
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/avif'].includes(heroSlideFile.type)) {
+      alert('Choose a JPEG, PNG, WebP, or AVIF photo')
+      return
+    }
+    if (heroSlideFile.size > 5 * 1024 * 1024) {
+      alert('Photo must be 5 MB or smaller')
+      return
+    }
+
+    setUploadingHeroSlide(true)
+    try {
+      await addHeroSlide(heroSlideFile)
+      setHeroSlideFile(null)
+      await loadData()
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Unable to add hero photo')
+    } finally {
+      setUploadingHeroSlide(false)
+    }
+  }
+
+  const handleDeleteHeroSlide = async (slideId: string) => {
+    if (!confirm('Remove this photo from the homepage hero?')) return
+    setRemovingHeroSlideId(slideId)
+    try {
+      await deleteHeroSlide(slideId)
+      await loadData()
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Unable to remove hero photo')
+    } finally {
+      setRemovingHeroSlideId('')
+    }
+  }
+
+  const handleHeroSlideActiveChange = async (slideId: string, active: boolean) => {
+    try {
+      await updateHeroSlide(slideId, active)
+      await loadData()
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Unable to update hero photo')
+    }
+  }
+
   const stats = [
     { label: 'Members', value: members.length },
     { label: 'Pending reviews', value: pendingMembers.length },
@@ -588,6 +703,7 @@ export default function Dashboard() {
     projects: { title: 'Manage projects', description: 'Update the active initiative list shown on the public projects page.' },
     resources: { title: 'Manage resources', description: 'Upload official documents and remove outdated files from the shared resource library.' },
     updates: { title: 'Publish updates', description: 'Post announcements, events, and jobs for the community feed.' },
+    'hero-slides': { title: 'Manage hero photos', description: 'Add or remove the photos shown in the homepage hero slideshow.' },
   } as const
 
   const activeMeta = activePanel ? panelMeta[activePanel] : null
@@ -608,6 +724,7 @@ export default function Dashboard() {
           <button type="button" className={`btn${activePanel === 'projects' ? ' secondary' : ''}`} onClick={() => setActivePanel('projects')}>Manage projects</button>
           <button type="button" className={`btn${activePanel === 'resources' ? ' secondary' : ''}`} onClick={() => setActivePanel('resources')}>Manage resources</button>
           <button type="button" className={`btn${activePanel === 'updates' ? ' secondary' : ''}`} onClick={() => setActivePanel('updates')}>Publish update</button>
+          <button type="button" className={`btn${activePanel === 'hero-slides' ? ' secondary' : ''}`} onClick={() => setActivePanel('hero-slides')}>Manage hero photos</button>
           {activePanel && <button type="button" className="btn secondary" onClick={() => setActivePanel(null)}>Back to overview</button>}
         </div>
       </div>
@@ -647,6 +764,7 @@ export default function Dashboard() {
               <button type="button" className={`field-btn${activePanel === 'projects' ? ' active' : ''}`} onClick={() => setActivePanel('projects')}>Projects</button>
               <button type="button" className={`field-btn${activePanel === 'resources' ? ' active' : ''}`} onClick={() => setActivePanel('resources')}>Resources</button>
               <button type="button" className={`field-btn${activePanel === 'updates' ? ' active' : ''}`} onClick={() => setActivePanel('updates')}>Updates</button>
+              <button type="button" className={`field-btn${activePanel === 'hero-slides' ? ' active' : ''}`} onClick={() => setActivePanel('hero-slides')}>Hero photos</button>
             </div>
           </div>
 
@@ -943,7 +1061,66 @@ export default function Dashboard() {
           )}
 
           {activePanel === 'payments' && (
-            <div className="dashboard-list">
+            <div>
+              <form className="dashboard-form dashboard-manual-payment-form" onSubmit={handleRecordManualPayment}>
+                <div>
+                  <h4>Record a member payment</h4>
+                  <p className="muted">Record a payment received outside the website. Membership dues will also update the member's membership status.</p>
+                </div>
+                <div className="dashboard-inline-row">
+                  <div>
+                    <label htmlFor="manual-payment-member">Member</label>
+                    <select
+                      id="manual-payment-member"
+                      value={manualPayment.memberEmail}
+                      onChange={(event) => setManualPayment({ ...manualPayment, memberEmail: event.target.value })}
+                      required
+                    >
+                      <option value="">Select a member</option>
+                      {members.filter((member) => member.email).map((member) => (
+                        <option key={member.email} value={member.email}>
+                          {member.name || 'Unnamed member'} ({member.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="manual-payment-amount">Amount (UGX)</label>
+                    <input id="manual-payment-amount" type="number" min="1" step="1" value={manualPayment.amount} onChange={(event) => setManualPayment({ ...manualPayment, amount: event.target.value })} required />
+                  </div>
+                  <div>
+                    <label htmlFor="manual-payment-purpose">Purpose</label>
+                    <input id="manual-payment-purpose" value={manualPayment.purpose} onChange={(event) => setManualPayment({ ...manualPayment, purpose: event.target.value })} maxLength={100} required />
+                  </div>
+                </div>
+                <div className="dashboard-inline-row">
+                  <div>
+                    <label htmlFor="manual-payment-method">Payment method</label>
+                    <select id="manual-payment-method" value={manualPayment.method} onChange={(event) => setManualPayment({ ...manualPayment, method: event.target.value })}>
+                      <option value="cash">Cash</option>
+                      <option value="bank">Bank transfer</option>
+                      <option value="mobile">Mobile money</option>
+                      <option value="card">Card</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="manual-payment-reference">Receipt / transaction reference (optional)</label>
+                    <input id="manual-payment-reference" value={manualPayment.reference} onChange={(event) => setManualPayment({ ...manualPayment, reference: event.target.value })} maxLength={200} />
+                  </div>
+                  <div>
+                    <label htmlFor="manual-payment-date">Payment date</label>
+                    <input id="manual-payment-date" type="date" value={manualPayment.paidAt} onChange={(event) => setManualPayment({ ...manualPayment, paidAt: event.target.value })} required />
+                  </div>
+                </div>
+                <div className="dashboard-actions">
+                  <button className="btn" type="submit" disabled={recordingPayment || !members.length}>
+                    {recordingPayment ? 'Recording payment...' : 'Record confirmed payment'}
+                  </button>
+                </div>
+              </form>
+
+              <div className="dashboard-list" style={{ marginTop: 16 }}>
               <div className="dashboard-toolbar" style={{ marginBottom: 12 }}>
                 <button type="button" className={`field-btn${paymentFilter === 'pending' ? ' active' : ''}`} onClick={() => setPaymentFilter('pending')}>Pending</button>
                 <button type="button" className={`field-btn${paymentFilter === 'paid' ? ' active' : ''}`} onClick={() => setPaymentFilter('paid')}>Paid</button>
@@ -953,9 +1130,10 @@ export default function Dashboard() {
                 <div className="dashboard-empty">No payment records in this view.</div>
               ) : visiblePayments.map((payment) => {
                 const id = String(payment._id || payment.id)
-                const confirmed = (payment.status || '').toLowerCase() === 'paid'
+                const confirmed = isPaymentConfirmed(payment)
+                const reviewing = reviewingPaymentId === id
                 return (
-                  <div key={id} className="dashboard-list-item">
+                  <div key={id} className="dashboard-list-item dashboard-payment-review-item">
                     <div>
                       <strong>{payment.memberName || payment.name || 'Unknown member'}</strong>
                       <div>{payment.purpose || 'Membership'} • {payment.currency || 'UGX'} {Number(payment.amount || 0).toLocaleString()}</div>
@@ -963,15 +1141,52 @@ export default function Dashboard() {
                     </div>
                     <div className="dashboard-actions">
                       <span className={`dashboard-chip ${confirmed ? 'success' : 'warn'}`}>{confirmed ? 'CONFIRMED' : 'PENDING'}</span>
+                      {confirmed && (
+                        <button
+                          className="btn secondary"
+                          type="button"
+                          aria-expanded={reviewing}
+                          onClick={() => setReviewingPaymentId(reviewing ? '' : id)}
+                        >
+                          {reviewing ? 'Close review' : 'Review'}
+                        </button>
+                      )}
                       {!confirmed && (
                         <button className="btn" type="button" onClick={() => handleConfirmPayment(payment)} disabled={busyPaymentId === id}>
                           {busyPaymentId === id ? 'Confirming...' : 'Confirm payment'}
                         </button>
                       )}
                     </div>
+                    {confirmed && reviewing && (
+                      <section className="card dashboard-member-details" aria-label={`Payment review for ${payment.memberName || payment.name || 'member'}`}>
+                        <h4>Confirmed payment details</h4>
+                        <dl className="dashboard-member-details-grid">
+                          {[
+                            ['Member', payment.memberName || payment.name],
+                            ['Email', payment.email],
+                            ['Phone', payment.phone],
+                            ['Purpose', payment.purpose],
+                            ['Amount', `${payment.currency || 'UGX'} ${Number(payment.amount || 0).toLocaleString()}`],
+                            ['Method', payment.method],
+                            ['Status', payment.status || (payment.paid ? 'paid' : 'pending')],
+                            ['Transaction reference', payment.txRef],
+                            ['Gateway reference', payment.gatewayReference || payment.reference],
+                            ['Paid on', formatDate(payment.confirmedAt)],
+                            ['Recorded on', formatDate(payment.createdAt || payment.at)],
+                          ].map(([label, value]) => (
+                            <div key={label}>
+                              <dt>{label}</dt>
+                              <dd>{value || 'Not provided'}</dd>
+                            </div>
+                          ))}
+                        </dl>
+                        {payment.receiptUrl && <a className="btn secondary" href={payment.receiptUrl} target="_blank" rel="noreferrer">View receipt</a>}
+                      </section>
+                    )}
                   </div>
                 )
               })}
+              </div>
             </div>
           )}
 
@@ -1275,6 +1490,66 @@ export default function Dashboard() {
                     <div className="dashboard-actions">
                       <div className="dashboard-chip">LIVE</div>
                       <button className="btn secondary" type="button" onClick={() => handleDeleteUpdate(post.id)}>Delete</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {activePanel === 'hero-slides' && (
+            <>
+              <form className="dashboard-form" onSubmit={handleHeroSlideSubmit}>
+                <div>
+                  <label htmlFor="hero-slide-file">Photo (JPEG, PNG, WebP, or AVIF; max 5 MB)</label>
+                  <input
+                    id="hero-slide-file"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/avif"
+                    onChange={(event) => setHeroSlideFile(event.target.files?.[0] || null)}
+                  />
+                </div>
+                <div className="dashboard-actions">
+                  <button className="btn" type="submit" disabled={!heroSlideFile || uploadingHeroSlide}>
+                    {uploadingHeroSlide ? 'Adding photo...' : 'Add hero photo'}
+                  </button>
+                </div>
+              </form>
+
+              <div className="dashboard-list" style={{ marginTop: 16 }}>
+                {heroSlides.length === 0 ? (
+                  <div className="dashboard-empty">No custom hero photos uploaded. The homepage will use its built-in slides.</div>
+                ) : heroSlides.map((slide) => (
+                  <div key={slide.id} className="dashboard-list-item">
+                    <div className="dashboard-hero-slide-item">
+                      <img src={slide.imageUrl} alt={slide.name || 'Homepage hero slide'} />
+                      <div>
+                        <strong>{slide.name || 'Homepage hero photo'}</strong>
+                        <div className="dashboard-list-meta">
+                          {slide.source === 'builtin' ? 'Built-in slide' : `Added ${formatDate(slide.uploadedAt)}`}
+                          {slide.active === false ? ' • Hidden from slideshow' : ''}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="dashboard-actions">
+                      {slide.source === 'builtin' ? (
+                        <button
+                          className="btn secondary"
+                          type="button"
+                          onClick={() => handleHeroSlideActiveChange(slide.id, slide.active === false)}
+                        >
+                          {slide.active === false ? 'Restore photo' : 'Hide photo'}
+                        </button>
+                      ) : (
+                        <button
+                          className="btn secondary"
+                          type="button"
+                          onClick={() => handleDeleteHeroSlide(slide.id)}
+                          disabled={removingHeroSlideId === slide.id}
+                        >
+                          {removingHeroSlideId === slide.id ? 'Removing...' : 'Remove photo'}
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

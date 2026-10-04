@@ -175,6 +175,74 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 })
 
+router.post('/manual', authMiddleware, async (req, res) => {
+  try {
+    const email = String(req.body?.memberEmail || '').trim().toLowerCase()
+    const amount = Number(req.body?.amount)
+    const purpose = String(req.body?.purpose || '').trim()
+    const method = String(req.body?.method || '').trim().toLowerCase()
+    const reference = String(req.body?.reference || '').trim()
+    const paidAt = req.body?.paidAt ? new Date(req.body.paidAt) : new Date()
+    const validMethods = ['cash', 'bank', 'mobile', 'card', 'other']
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+      || !Number.isSafeInteger(amount)
+      || amount <= 0
+      || !purpose
+      || purpose.length > 100
+      || !validMethods.includes(method)
+      || reference.length > 200
+      || Number.isNaN(paidAt.getTime())) {
+      return res.status(400).json({ message: 'Provide a valid member, whole-number amount, purpose, payment method, and payment date' })
+    }
+
+    let member = isDbConnected()
+      ? await Member.findOne({ email })
+      : listMembers().find((item) => String(item.email || '').toLowerCase() === email)
+    if (!member) return res.status(404).json({ message: 'Member not found' })
+
+    const now = new Date()
+    const isMembershipPayment = /^(alumni dues|membership(?: dues)?)$/i.test(purpose)
+    if (isMembershipPayment) {
+      member.paymentStatus = 'paid'
+      member.confirmedAt = paidAt
+      if (!member.membershipNumber) member.membershipNumber = generateMembershipNumber()
+      if (isDbConnected()) await member.save()
+      else upsertMember(member)
+    }
+
+    const paymentData = {
+      memberId: member._id || member.id,
+      memberName: member.name,
+      email: member.email,
+      phone: member.phone || '',
+      amount,
+      currency: 'UGX',
+      method,
+      purpose,
+      txRef: `MANUAL-${crypto.randomUUID()}`,
+      gatewayReference: reference,
+      recordedBy: req.user.email,
+      status: 'paid',
+      confirmedAt: paidAt,
+      createdAt: paidAt,
+      updatedAt: now,
+    }
+    let payment
+    if (isDbConnected()) {
+      payment = await Payment.create(paymentData)
+    } else {
+      payment = { ...paymentData, id: `payment_${crypto.randomUUID()}` }
+      upsertPayment(payment)
+    }
+
+    res.status(201).json({ ok: true, payment: payment.toObject ? payment.toObject() : payment, member: member.toObject ? member.toObject() : member })
+  } catch (err) {
+    console.error('Failed to record manual payment:', err)
+    res.status(500).json({ message: 'Failed to record payment' })
+  }
+})
+
 router.post('/checkout', async (req, res) => {
   try {
     const member = req.body?.member || {}

@@ -1,13 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import schoolCrest from '../assets/school-crest.png';
-
-const heroSlideImages = Object.values(
-  import.meta.glob('../assets/hero-slides/*.{jpg,jpeg,png,webp,avif}', {
-    eager: true,
-    import: 'default',
-  }),
-) as string[];
+import { getHeroSlides } from '../services/mockService';
+import { builtInHeroSlides } from '../utils/heroSlides';
 
 const fallbackHeroImages = [
   'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80',
@@ -15,7 +10,9 @@ const fallbackHeroImages = [
   'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80',
 ];
 
-const slides = heroSlideImages.length ? heroSlideImages : fallbackHeroImages;
+const fallbackSlides = builtInHeroSlides.length
+  ? builtInHeroSlides.map((slide) => slide.imageUrl)
+  : fallbackHeroImages
 
 const quickActions = [
   {
@@ -86,7 +83,23 @@ const reasons = [
 ];
 
 const Home: React.FC = () => {
+  const [slides, setSlides] = useState(fallbackSlides);
   const [activeSlide, setActiveSlide] = useState(0);
+
+  useEffect(() => {
+    let mounted = true;
+    getHeroSlides()
+      .then((heroSlideState) => {
+        if (!mounted) return
+        setSlides(heroSlideState.managed
+          ? heroSlideState.slides.map((slide) => slide.imageUrl)
+          : fallbackSlides)
+      })
+      .catch((error) => console.error('Failed to load homepage hero photos:', error));
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (slides.length < 2) {
@@ -98,7 +111,11 @@ const Home: React.FC = () => {
     }, 6000);
 
     return () => window.clearInterval(slideTimer);
-  }, []);
+  }, [slides.length]);
+
+  useEffect(() => {
+    setActiveSlide((currentSlide) => (slides.length ? currentSlide % slides.length : 0));
+  }, [slides.length]);
 
   return (
     <div className="home-page">
