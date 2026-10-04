@@ -46,6 +46,7 @@ This repository contains two major parts:
 2. Users can register as alumni, choose a country calling code and gender, search members, and view member details.
 3. The payments page creates Flutterwave hosted checkout sessions for Uganda mobile money or cards. Membership is confirmed only after server-side transaction verification.
 4. Community posts, job listings, leaders, resources, and project data are served through the shared `mockService.ts` layer.
+5. Admins can review and update all member records from the dashboard, open titled member details with per-member payment history, and manage payment records. Full member records and payment-history API responses require admin authentication.
 
 ### Backend integration
 

@@ -1573,6 +1573,46 @@ select:focus {
     background: #f7faff;
   }
 
+  .dashboard-member-details {
+    display: grid;
+    gap: 14px;
+    margin: 8px 0;
+    padding: 16px;
+    background: #f9fbff;
+  }
+
+  .dashboard-member-details h4 {
+    margin: 0;
+  }
+
+  .dashboard-member-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+    gap: 12px;
+    margin: 0;
+  }
+
+  .dashboard-member-details-grid > div {
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid #edf1f7;
+    border-radius: 10px;
+    background: #ffffff;
+  }
+
+  .dashboard-member-details-grid dt {
+    margin-bottom: 4px;
+    color: #526579;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .dashboard-member-details-grid dd {
+    margin: 0;
+    color: #102a43;
+    overflow-wrap: anywhere;
+  }
+
   .dashboard-form {
     display: grid;
     gap: 12px;

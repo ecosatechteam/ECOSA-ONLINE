@@ -163,7 +163,7 @@ async function confirmVerifiedPayment(payment, transaction) {
   return { payment, member }
 }
 
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     seedPayments()
     const payments = isDbConnected()

@@ -33,7 +33,11 @@ function findAdminByEmail(email) {
 }
 
 function upsertMember(member) {
-  const existingIndex = state.members.findIndex((item) => item.email === member.email)
+  const memberId = member.id || member._id || member.membershipNumber
+  const existingIndex = state.members.findIndex((item) => (
+    (memberId && String(item.id || item._id || item.membershipNumber) === String(memberId))
+    || String(item.email || '').toLowerCase() === String(member.email || '').toLowerCase()
+  ))
   if (existingIndex >= 0) {
     state.members[existingIndex] = { ...state.members[existingIndex], ...member }
     return state.members[existingIndex]

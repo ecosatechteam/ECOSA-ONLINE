@@ -354,7 +354,8 @@ export async function getAllMembers() {
     const result = await api('/members?all=true')
     if (Array.isArray(result) && result.length) return result
     return read('ecosa_members')
-  } catch {
+  } catch (error) {
+    if (typeof error === 'object' && error !== null && 'status' in error) throw error
     return read('ecosa_members')
   }
 }
@@ -372,6 +373,34 @@ export async function saveMember(m: Member) {
     else list.push(m)
     write('ecosa_members', list)
     return m
+  }
+}
+
+export async function updateMember(
+  memberId: string,
+  data: { originalEmail: string; member: Partial<Member> },
+) {
+  try {
+    return await api(`/members/${encodeURIComponent(memberId)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+  } catch (error) {
+    if (typeof error === 'object' && error !== null && 'status' in error) throw error
+    const list = read('ecosa_members')
+    const existing = list.find((item: any) =>
+      String(item.id || item._id || item.membershipNumber || item.email) === memberId
+      || String(item.email || '').toLowerCase() === data.originalEmail.toLowerCase()
+    )
+    if (!existing) throw new Error('Member not found in local storage')
+    const duplicate = list.find((item: any) =>
+      item !== existing && String(item.email || '').toLowerCase() === String(data.member.email || '').toLowerCase()
+    )
+    if (duplicate) throw new Error('Another member already uses this email address')
+    Object.assign(existing, data.member)
+    write('ecosa_members', list)
+    return existing
   }
 }
 
@@ -492,7 +521,8 @@ export async function getPayments() {
     const result = await api('/payments')
     if (Array.isArray(result) && result.length) return result
     return read('ecosa_payments')
-  } catch {
+  } catch (error) {
+    if (typeof error === 'object' && error !== null && 'status' in error) throw error
     return read('ecosa_payments')
   }
 }
