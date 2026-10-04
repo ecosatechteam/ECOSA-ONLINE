@@ -73,7 +73,7 @@ const Footer: React.FC = () => {
         <div className="footer-links">
           <h4>Contact</h4>
 
-          <p>📞 +256 700 123 456</p>
+          <p>📞 <a href="tel:+256753414058">+256 753 414 058</a></p>
           <p>✉️ info@ecosa.org</p>
 
           <p>

@@ -16,7 +16,7 @@ export default function Contact() {
       <section className="feature-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
         <article className="card feature-card">
           <span className="feature-kicker">Phone</span>
-          <h3>+256 700 123 456</h3>
+          <h3><a href="tel:+256753414058">+256 753 414 058</a></h3>
           <p>Call the ECOSA office for alumni and association inquiries.</p>
         </article>
 

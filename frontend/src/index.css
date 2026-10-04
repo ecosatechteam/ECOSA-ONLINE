@@ -1560,6 +1560,28 @@ select:focus {
     letter-spacing: 0.02em;
   }
 
+  .dashboard-form .registration-business-toggle {
+    display: flex;
+    align-items: center;
+    justify-self: start;
+    gap: 10px;
+    margin: 8px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: normal;
+    cursor: pointer;
+  }
+
+  .dashboard-form .registration-business-toggle input[type="checkbox"] {
+    flex: 0 0 22px;
+    width: 22px;
+    height: 22px;
+    margin: 0;
+    padding: 0;
+    accent-color: var(--primary);
+    cursor: pointer;
+  }
+
   .dashboard-empty {
     padding: 16px;
     border-radius: 14px;
@@ -1567,6 +1589,53 @@ select:focus {
     background: #fbfcff;
     color: var(--muted);
     text-align: center;
+  }
+
+  .floating-whatsapp {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #25d366;
+    color: #ffffff;
+    box-shadow: 0 8px 24px rgba(16, 80, 43, 0.35);
+    text-decoration: none;
+    animation: whatsapp-pulse 1.6s ease-in-out infinite;
+  }
+
+  .floating-whatsapp:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(16, 80, 43, 0.34);
+    animation-play-state: paused;
+  }
+
+  .floating-whatsapp svg {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+  }
+
+  @keyframes whatsapp-pulse {
+    0%, 100% {
+      box-shadow: 0 8px 24px rgba(16, 80, 43, 0.35);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 8px 30px rgba(37, 211, 102, 0.65);
+      transform: scale(1.08);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .floating-whatsapp {
+      animation: none;
+    }
   }
 
   .dashboard-panel {

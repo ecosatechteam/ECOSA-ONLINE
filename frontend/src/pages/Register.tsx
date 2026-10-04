@@ -156,15 +156,9 @@ export default function Register() {
           onChange={(e) => setProfession(e.target.value)}
         />
 
-        <label
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            marginTop: 8,
-          }}
-        >
+        <label className="registration-business-toggle" htmlFor="registration-has-business">
           <input
+            id="registration-has-business"
             type="checkbox"
             checked={hasBusiness}
             onChange={(e) => setHasBusiness(e.target.checked)}
