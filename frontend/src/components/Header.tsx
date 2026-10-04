@@ -111,8 +111,10 @@ export default function Header() {
               />
 
               <div className="header-title">
-                <strong>ECOSA</strong> — Equatorial College Old Students
-                Association
+                <strong>ECOSA</strong>
+                <span className="header-title-full">
+                  {' '}— Equatorial College Old Students Association
+                </span>
               </div>
             </Link>
 
