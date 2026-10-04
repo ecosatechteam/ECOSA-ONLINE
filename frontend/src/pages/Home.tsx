@@ -132,24 +132,25 @@ const Home: React.FC = () => {
             ))}
           </div>
 
-          <div className="home-hero-panel">
-            <img className="home-school-crest" src={schoolCrest} alt="Equatorial College School crest" />
-            <div className="home-hero-panel-title">EQUATORIAL COLLEGE</div>
-            <div className="home-hero-panel-sub">SCHOOL - IBANDA</div>
-            <div className="home-hero-panel-meta">
-              <span>DISCIPLINE</span>
-              <span>KNOWLEDGE</span>
-              <span>SERVICE</span>
-            </div>
-            <a
-              className="home-school-link"
-              href="https://ecs.ac.ug/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Visit our former school website <span aria-hidden="true">↗</span>
-            </a>
+        </div>
+
+        <div className="home-hero-panel">
+          <img className="home-school-crest" src={schoolCrest} alt="Equatorial College School crest" />
+          <div className="home-hero-panel-title">EQUATORIAL COLLEGE</div>
+          <div className="home-hero-panel-sub">SCHOOL - IBANDA</div>
+          <div className="home-hero-panel-meta">
+            <span>DISCIPLINE</span>
+            <span>KNOWLEDGE</span>
+            <span>SERVICE</span>
           </div>
+          <a
+            className="home-school-link"
+            href="https://ecs.ac.ug/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Visit our former school website <span aria-hidden="true">↗</span>
+          </a>
         </div>
       </section>
 

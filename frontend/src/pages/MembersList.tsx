@@ -20,7 +20,7 @@ export default function MembersList(){
             Search the members directory and view member profiles in a clean, readable layout.
           </p>
         </div>
-        <div className="section-actions" style={{ minWidth: 320 }}>
+        <div className="section-actions">
           <div>
             <label>Search</label>
             <input placeholder="Search members by name" value={query} onChange={e=>setQuery(e.target.value)} />

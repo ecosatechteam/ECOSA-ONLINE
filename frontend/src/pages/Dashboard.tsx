@@ -592,8 +592,8 @@ export default function Dashboard() {
                       <input id="dashboard-member-employment" value={memberForm.employment} onChange={(event) => setMemberForm({ ...memberForm, employment: event.target.value })} />
                     </div>
                   </div>
-                  <label className="dashboard-checkbox-label">
-                    <input type="checkbox" checked={memberForm.hasBusiness} onChange={(event) => setMemberForm({ ...memberForm, hasBusiness: event.target.checked })} />
+                  <label className="dashboard-checkbox-label" htmlFor="dashboard-member-has-business">
+                    <input id="dashboard-member-has-business" type="checkbox" checked={memberForm.hasBusiness} onChange={(event) => setMemberForm({ ...memberForm, hasBusiness: event.target.checked })} />
                     I own a business
                   </label>
                   {memberForm.hasBusiness && (
