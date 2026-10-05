@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Icon from "./Icon";
 
 const Footer: React.FC = () => {
   return (
@@ -73,11 +74,11 @@ const Footer: React.FC = () => {
         <div className="footer-links">
           <h4>Contact</h4>
 
-          <p>📞 <a href="tel:+256753414058">+256 753 414 058</a></p>
-          <p>✉️ info@ecosa.org</p>
+          <p><Icon name="phone" size={16} /> <a href="tel:+256753414058">+256 753 414 058</a></p>
+          <p><Icon name="mail" size={16} /> info@ecosa.org</p>
 
           <p>
-            📍 Equatorial College Ibanda
+            <Icon name="map-pin" size={16} /> Equatorial College Ibanda
             <br />
             Ibanda District, Uganda
           </p>

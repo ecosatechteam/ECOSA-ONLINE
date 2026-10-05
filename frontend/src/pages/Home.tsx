@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Icon, { type IconName } from '../components/Icon';
 import schoolCrest from '../assets/school-crest.png';
 import { getHeroSlides } from '../services/mockService';
 import { builtInHeroSlides } from '../utils/heroSlides';
@@ -14,58 +15,64 @@ const fallbackSlides = builtInHeroSlides.length
   ? builtInHeroSlides.map((slide) => slide.imageUrl)
   : fallbackHeroImages
 
-const quickActions = [
+const quickActions: Array<{
+  icon: IconName;
+  title: string;
+  description: string;
+  to: string;
+  accent: string;
+}> = [
   {
-    icon: '👤',
+    icon: 'user',
     title: 'Pay Membership',
     description: 'Pay your ECOSA membership dues and support the work of our alumni community.',
     to: '/payments?purpose=Alumni%20Dues',
     accent: 'green',
   },
   {
-    icon: '👥',
+    icon: 'users',
     title: 'Alumni Network',
     description: 'Find fellow alumni, build professional connections, and discover new opportunities.',
     to: '/members',
     accent: 'blue',
   },
   {
-    icon: '💬',
+    icon: 'message',
     title: 'Community',
     description: 'Receive announcements, event updates, job opportunities, and news from ECOSA chapters.',
     to: '/community',
     accent: 'purple',
   },
   {
-    icon: '💡',
+    icon: 'lightbulb',
     title: 'Impact Projects',
     description: 'Explore initiatives that turn alumni collaboration into meaningful community impact.',
     to: '/projects',
     accent: 'gold',
   },
   {
-    icon: '🏅',
+    icon: 'award',
     title: 'Leaders',
     description: 'Meet the alumni leaders shaping the direction and future of ECOSA.',
     to: '/leaders',
     accent: 'green',
   },
   {
-    icon: '📚',
+    icon: 'book',
     title: 'Resources',
     description: 'Find practical information, opportunities, and tools to help you move forward.',
     to: '/resources',
     accent: 'blue',
   },
   {
-    icon: '📍',
+    icon: 'map-pin',
     title: 'Chapters',
     description: 'Discover chapters near you and connect with alumni in your region.',
     to: '/chapters',
     accent: 'purple',
   },
   {
-    icon: '🤝',
+    icon: 'handshake',
     title: 'Donation',
     description: 'Help sustain projects and initiatives that create lasting value for our communities.',
     to: '/payments?purpose=Project+Donation',
@@ -73,13 +80,13 @@ const quickActions = [
   },
 ];
 
-const reasons = [
-  { icon: '🤝', title: 'Stay Connected', description: 'Reunite with classmates and build new relationships.' },
-  { icon: '📚', title: 'Grow Professionally', description: 'Access resources, mentorship and career opportunities.' },
-  { icon: '💡', title: 'Make an Impact', description: 'Support initiatives that create real change.' },
-  { icon: '🌍', title: 'Global Reach', description: 'A growing network of alumni across the world.' },
-  { icon: '💛', title: 'Give Back', description: 'Share your knowledge, experience and support.' },
-  { icon: '🤝', title: 'Stronger Together', description: 'Because our success is built on each other.' },
+const reasons: Array<{ icon: IconName; title: string; description: string }> = [
+  { icon: 'handshake', title: 'Stay Connected', description: 'Reunite with classmates and build new relationships.' },
+  { icon: 'book', title: 'Grow Professionally', description: 'Access resources, mentorship and career opportunities.' },
+  { icon: 'lightbulb', title: 'Make an Impact', description: 'Support initiatives that create real change.' },
+  { icon: 'globe', title: 'Global Reach', description: 'A growing network of alumni across the world.' },
+  { icon: 'heart', title: 'Give Back', description: 'Share your knowledge, experience and support.' },
+  { icon: 'users', title: 'Stronger Together', description: 'Because our success is built on each other.' },
 ];
 
 const Home: React.FC = () => {
@@ -180,7 +187,7 @@ const Home: React.FC = () => {
       <section className="home-actions-grid">
         {quickActions.map((action) => (
           <Link key={action.title} className={`home-action-card ${action.accent}`} to={action.to}>
-            <div className="home-action-icon">{action.icon}</div>
+            <div className="home-action-icon"><Icon name={action.icon} size={26} /></div>
             <h3>{action.title}</h3>
             <p>{action.description}</p>
             <span className="home-action-link">
@@ -223,7 +230,7 @@ const Home: React.FC = () => {
         <div className="home-value-grid">
           {reasons.map((reason) => (
             <div key={reason.title} className="home-value-card">
-              <div className="home-value-icon">{reason.icon}</div>
+              <div className="home-value-icon"><Icon name={reason.icon} size={30} /></div>
               <h3>{reason.title}</h3>
               <p>{reason.description}</p>
             </div>

@@ -109,6 +109,7 @@ export default function Dashboard() {
     paidAt: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10),
   })
   const [activePanel, setActivePanel] = useState<'members' | 'payments' | 'chapters' | 'leaders' | 'projects' | 'resources' | 'updates' | 'hero-slides' | null>(null)
+  const [dashboardMenuOpen, setDashboardMenuOpen] = useState(false)
   const [memberFilter, setMemberFilter] = useState<'all' | 'pending' | 'paid'>('all')
   const [showMemberForm, setShowMemberForm] = useState(false)
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'pending' | 'paid'>('pending')
@@ -716,20 +717,32 @@ export default function Dashboard() {
           <h3>ECOSA Admin Workspace</h3>
           <p>Review members, confirm payments, manage chapters and resources, and publish official updates from one control center.</p>
         </div>
-        <div className="dashboard-hero-actions">
+        <nav className={`dashboard-hero-actions${dashboardMenuOpen ? ' open' : ''}`} aria-label="Dashboard menu">
+          <button
+            type="button"
+            className="dashboard-menu-toggle"
+            onClick={() => setDashboardMenuOpen((open) => !open)}
+            aria-label={dashboardMenuOpen ? 'Close dashboard menu' : 'Open dashboard menu'}
+            aria-expanded={dashboardMenuOpen}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
           <button type="button" className="btn secondary" onClick={() => { adminLogout(); navigate('/admin/login', { replace: true }) }}>Log out</button>
-          <button type="button" className={`btn${activePanel === 'members' ? ' secondary' : ''}`} onClick={() => setActivePanel('members')}>Review members</button>
-          <button type="button" className={`btn${activePanel === 'payments' ? ' secondary' : ''}`} onClick={() => setActivePanel('payments')}>Confirm payments</button>
-          <button type="button" className={`btn${activePanel === 'chapters' ? ' secondary' : ''}`} onClick={() => setActivePanel('chapters')}>Manage chapters</button>
-          <button type="button" className={`btn${activePanel === 'leaders' ? ' secondary' : ''}`} onClick={() => setActivePanel('leaders')}>Manage leaders</button>
-          <button type="button" className={`btn${activePanel === 'projects' ? ' secondary' : ''}`} onClick={() => setActivePanel('projects')}>Manage projects</button>
-          <button type="button" className={`btn${activePanel === 'resources' ? ' secondary' : ''}`} onClick={() => setActivePanel('resources')}>Manage resources</button>
-          <button type="button" className={`btn${activePanel === 'updates' ? ' secondary' : ''}`} onClick={() => setActivePanel('updates')}>Publish update</button>
-          <button type="button" className={`btn${activePanel === 'hero-slides' ? ' secondary' : ''}`} onClick={() => setActivePanel('hero-slides')}>Manage hero photos</button>
-          {activePanel && <button type="button" className="btn secondary" onClick={() => setActivePanel(null)}>Back to overview</button>}
-        </div>
+          <button type="button" className={`btn${activePanel === 'members' ? ' secondary' : ''}`} onClick={() => { setActivePanel('members'); setDashboardMenuOpen(false) }}>Review members</button>
+          <button type="button" className={`btn${activePanel === 'payments' ? ' secondary' : ''}`} onClick={() => { setActivePanel('payments'); setDashboardMenuOpen(false) }}>Confirm payments</button>
+          <button type="button" className={`btn${activePanel === 'chapters' ? ' secondary' : ''}`} onClick={() => { setActivePanel('chapters'); setDashboardMenuOpen(false) }}>Manage chapters</button>
+          <button type="button" className={`btn${activePanel === 'leaders' ? ' secondary' : ''}`} onClick={() => { setActivePanel('leaders'); setDashboardMenuOpen(false) }}>Manage leaders</button>
+          <button type="button" className={`btn${activePanel === 'projects' ? ' secondary' : ''}`} onClick={() => { setActivePanel('projects'); setDashboardMenuOpen(false) }}>Manage projects</button>
+          <button type="button" className={`btn${activePanel === 'resources' ? ' secondary' : ''}`} onClick={() => { setActivePanel('resources'); setDashboardMenuOpen(false) }}>Manage resources</button>
+          <button type="button" className={`btn${activePanel === 'updates' ? ' secondary' : ''}`} onClick={() => { setActivePanel('updates'); setDashboardMenuOpen(false) }}>Publish update</button>
+          <button type="button" className={`btn${activePanel === 'hero-slides' ? ' secondary' : ''}`} onClick={() => { setActivePanel('hero-slides'); setDashboardMenuOpen(false) }}>Manage hero photos</button>
+          {activePanel && <button type="button" className="btn secondary" onClick={() => { setActivePanel(null); setDashboardMenuOpen(false) }}>Back to overview</button>}
+        </nav>
       </div>
 
+      <div className="dashboard-main-content">
       {!activePanel && (
         <>
           <div className="dashboard-stats">
@@ -1560,6 +1573,7 @@ export default function Dashboard() {
           )}
         </section>
       )}
+      </div>
     </div>
   )
 }

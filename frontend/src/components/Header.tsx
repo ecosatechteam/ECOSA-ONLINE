@@ -12,7 +12,7 @@ const Hamburger: React.FC<HamburgerProps> = ({ isOpen, onClick }) => {
       className={`header-toggle${isOpen ? " open" : ""}`}
       type="button"
       onClick={onClick}
-      aria-label="Menu"
+      aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
       aria-expanded={isOpen}
     >
       <span />
